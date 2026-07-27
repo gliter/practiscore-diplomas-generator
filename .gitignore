@@ -1,0 +1,8 @@
+.venv/
+.uv-cache/
+.test-deps/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+shooters-summary.yaml
+diplomas-data.yaml

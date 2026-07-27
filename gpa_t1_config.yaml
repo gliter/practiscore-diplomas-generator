@@ -1,0 +1,98 @@
+exclude_shooters:
+  surnames:
+    - "(?i)^par$"
+  ids: []
+
+series:
+  best_in_division:
+    type: best_shooter
+    group_by:
+      - division
+    filters:
+      divisions:
+        exclude:
+          - "NFC.*"
+    min_competitors: [0, 5, 10]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+
+  most_accurate_iron_sight:
+    type: most_accurate
+    group_by: []
+    filters:
+      divisions:
+        include:
+          - "CPI.*"
+          - "FSI.*"
+          - "LCI.*"
+          - "REV.*"
+        exclude:
+          - "NFC.*"
+    min_competitors: [0]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties:
+      - "Hits on Non-Threat"
+
+  most_accurate_optics:
+    type: most_accurate
+    group_by: []
+    filters:
+      divisions:
+        include:
+          - "CPO.*"
+          - "FSO.*"
+          - "LCO.*"
+        exclude:
+          - "NFC.*"
+    min_competitors: [0]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties:
+      - "Hits on Non-Threat"
+
+  best_lady:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        exclude:
+          - "NFC.*"
+      categories:
+        include:
+          - "Lady.*"
+        exclude: []
+    min_competitors: [0]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+
+  best_in_category:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        exclude:
+          - "NFC.*"
+      categories:
+        exclude:
+          - "Lady.*"
+    min_competitors: [0, 5, 10]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+
+  fastest:
+    type: fastest
+    group_by: []
+    filters:
+      divisions:
+        exclude:
+          - "NFC.*"
+    min_competitors: [0]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
