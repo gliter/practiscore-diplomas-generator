@@ -56,7 +56,17 @@ uv run practiscore-diplomas parse "match-export.pcs" `
 
 Each series also defines `text.first_line` and `text.second_line`; optional `third_line` and `fourth_line` can be added. Templates support fields such as `{{ place }}`, `{{ shooter.raw_time }}`, and global map calls such as `{{ division_code(division) }}` or `{{ class_code(shooter.class) }}`. Global maps use regex keys for text values and integer keys for places. Missing mappings are reported as configuration errors.
 
-The `render` command is reserved for the future DOCX diploma-generation feature. The `-o` option is reserved for that final document output.
+## Render Diplomas
+
+Render the intermediate diploma data into one DOCX file using a DOCX template:
+
+```powershell
+uv run practiscore-diplomas render `
+  --template "diploma-template.docx" `
+  -o "diplomas.docx"
+```
+
+The command reads `diplomas-data.yaml` by default. Override it with `--diplomas-input`. The template is cloned once for each diploma record, in series and ranking order. Placeholders use `{{ field }}` syntax and can refer to `first_line`, `second_line`, optional `third_line`/`fourth_line`, `place`, `division`, `category`, `class`, `metric_value`, or shooter fields such as `{{ shooter.raw_time }}` and `{{ shooter.points_down }}`. Placeholders in document paragraphs and tables are supported. Missing optional third and fourth lines render as empty text; other missing or unknown fields are errors.
 
 ## Python API
 

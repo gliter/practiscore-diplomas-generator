@@ -2,7 +2,7 @@
 
 ## Repository Purpose
 
-This repository contains a Python application that parses PractiScore exports, selects diploma recipients, and will later generate diploma documents. The current implementation provides the `parse` operation, which writes both intermediate files. `render` is reserved for the future DOCX stage.
+This repository contains a Python application that parses PractiScore exports, selects diploma recipients, and renders diploma documents. `parse` writes the intermediate shooter summary and diploma data; `render` turns diploma data and a DOCX template into the final document.
 
 ## Development Setup
 
@@ -19,6 +19,7 @@ The project targets Python 3.10 or newer. Keep dependencies declared in `pyproje
 
 - `src/practiscore_diplomas/parser.py`: archive/directory loading and score aggregation.
 - `src/practiscore_diplomas/diplomas.py`: configuration validation, grouping, eligibility, ranking, and diploma-data generation.
+- `src/practiscore_diplomas/render.py`: DOCX template expansion and multi-page document assembly.
 - `src/practiscore_diplomas/cli.py`: `parse`/`render` command-line interface and YAML serialization.
 - `tests/`: anonymized unit and CLI tests.
 - `diplom generator.md`: product specification and PractiScore field notes.
@@ -29,10 +30,10 @@ The parser reads only current `match_scores` data. `match_scores_history` is not
 
 ```text
 practiscore-diplomas parse INPUT [--config PATH] [--summary-output PATH] [--diplomas-output PATH]
-practiscore-diplomas render ...
+practiscore-diplomas render [--diplomas-input PATH] --template PATH -o PATH
 ```
 
-The `parse` command defaults to `config.yaml`, `shooters-summary.yaml`, and `diplomas-data.yaml`. Do not introduce `-o` for intermediate outputs: `-o` is reserved for the future final diploma document command.
+The `parse` command defaults to `config.yaml`, `shooters-summary.yaml`, and `diplomas-data.yaml`. Do not introduce `-o` for intermediate outputs: `-o` is reserved for the final rendered diploma document. `render` defaults to `diplomas-data.yaml`, clones the DOCX template for every record in series/ranking order, and writes one output DOCX. It expands placeholders in body paragraphs and tables using `{{ field }}` syntax. Supported fields include the diploma lines, `place`, `division`, `category`, `class`, `metric_value`, and `shooter.<field>` values. Missing `third_line` and `fourth_line` values render empty; other missing or unknown placeholders are errors.
 
 Diploma configuration uses keyed series mappings. Filter values are regular expressions, with `*` reserved for match-all. Structured filters support `include` and `exclude`; include must match and exclude takes precedence. The filters section, dimensions, include lists, and exclude lists are optional; omitted values mean include all and exclude none. `min_competitors: [5, 7, 13]` produces one diploma at 5 eligible competitors, two at 7, and three at 13. Diploma output is keyed by series and contains placement plus explicit grouping context.
 
@@ -53,6 +54,7 @@ Feature 2b requires every series to define `text.first_line` and `text.second_li
 - Add tests for new scoring behavior, malformed inputs, and CLI behavior.
 - Use synthetic names, emails, IDs, and match data in tests and documentation. Never copy personal data from the supplied exports.
 - Keep changes scoped to the requested feature and avoid unrelated formatting or refactoring.
+- Keep DOCX rendering tests synthetic and verify both paragraph and table placeholder replacement.
 
 ## Verification Checklist
 
@@ -60,5 +62,6 @@ Before completing a change:
 
 1. Run `uv run pytest`.
 2. Run `uv run practiscore-diplomas --help` when changing the CLI.
-3. For parser changes, test both an archive and an unpacked export when relevant.
-4. Confirm generated files and dependency caches are ignored by Git.
+3. Run a focused DOCX rendering test when changing template behavior.
+4. For parser changes, test both an archive and an unpacked export when relevant.
+5. Confirm generated files and dependency caches are ignored by Git.

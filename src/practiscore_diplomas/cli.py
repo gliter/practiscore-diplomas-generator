@@ -7,6 +7,7 @@ import yaml
 
 from .diplomas import DiplomaDataError, generate_diplomas, load_config
 from .parser import MatchParseError, load_match_data, parse_match_data
+from .render import DiplomaRenderError, render_diplomas
 
 DEFAULT_CONFIG = Path("config.yaml")
 DEFAULT_SUMMARY_OUTPUT = Path("shooters-summary.yaml")
@@ -27,8 +28,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parse.add_argument("--config", type=Path, default=DEFAULT_CONFIG, help=f"Configuration YAML (default: {DEFAULT_CONFIG})")
     parse.add_argument("--summary-output", type=Path, default=DEFAULT_SUMMARY_OUTPUT, help=f"Shooter summary YAML (default: {DEFAULT_SUMMARY_OUTPUT})")
     parse.add_argument("--diplomas-output", type=Path, default=DEFAULT_DIPLOMAS_OUTPUT, help=f"Diploma data YAML (default: {DEFAULT_DIPLOMAS_OUTPUT})")
-    render = commands.add_parser("render", help="Render diploma documents (not implemented yet)")
-    render.add_argument("input", nargs="?", type=Path, help="Future diploma-data input")
+    render = commands.add_parser("render", help="Render diploma data into a DOCX document")
+    render.add_argument("--diplomas-input", type=Path, default=DEFAULT_DIPLOMAS_OUTPUT, help=f"Diploma data YAML (default: {DEFAULT_DIPLOMAS_OUTPUT})")
+    render.add_argument("--template", type=Path, required=True, help="DOCX diploma template")
+    render.add_argument("-o", "--output", type=Path, required=True, help="Final DOCX output")
     return parser
 
 
@@ -36,7 +39,11 @@ def main() -> int:
     parser = _build_parser()
     args = parser.parse_args()
     if args.command == "render":
-        parser.error("render is reserved for a future feature")
+        try:
+            render_diplomas(args.diplomas_input, args.template, args.output)
+        except (DiplomaRenderError, OSError) as exc:
+            parser.error(str(exc))
+        return 0
     try:
         match = load_match_data(args.input)
         configs = load_config(args.config)
