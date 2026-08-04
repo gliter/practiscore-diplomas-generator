@@ -13,6 +13,7 @@ practiscore-diplomas = "practiscore_diplomas.cli:main"
 
 [dependency-groups]
 dev = [
+    "pyinstaller>=6.0",
     "pytest>=8.0",
 ]
 

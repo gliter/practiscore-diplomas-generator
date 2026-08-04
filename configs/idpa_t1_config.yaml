@@ -1,36 +1,35 @@
 exclude_shooters:
   surnames:
-    - "(?i)^par$"
+    - "(?i)par"
   ids: []
 
 mark_chrono_failure_as_dnf: true
 
 maps:
   division_code:
-    "CPI.*": CPI
-    "FSI.*": FSI
-    "LCI.*": LCI
-    "REV.*": REV
-    "CPO.*": CPO
-    "FSO.*": FSO
-    "LCO.*": LCO
+    "CCP": CCP
+    "CDP": CDP
+    "ESP": ESP
+    "SSP": SSP
+    "CO": CO
+    "PCC": PCC
   category_code_map:
     "Junior.*": JUNIOR
     "Senior.*": SENIOR
-    "Super Senior.*": SUPER SENIOR
-    "Lady.*": LADY
+    "Distinguished Senior.*": DISTINGUISHED SENIOR
+    "Lady": LADY
     "International.*": INTERNATIONAL
-    "Industry.*": INDUSTRY
-    "Law Enforcement.*": LAW ENFORCEMENT
-    "Military.*": MILITARY
-    "Veteran.*": VETERAN
+    "Industry": INDUSTRY
+    "Law Enforcement": LAW ENFORCEMENT
+    "Military": MILITARY
   class_code_map:
-    "Double Platinum.*": DOUBLE PLATINUM
-    "Platinum.*": PLATINUM
-    "Gold.*": GOLD
-    "Silver.*": SILVER
-    "Bronze.*": BRONZE
-    "Pew Pewter.*": PEW PEWTER
+    "DM": DISTINGUISHED MASTER
+    "MA": MASTER
+    "EX": EXPERT
+    "SS": SHARPSHOOTER
+    "MM": MARKSMAN
+    "NV": NOVICE
+    "UN": UNCLASSIFIED
   division_place:
     1: CHAMPION
     2: 2nd PLACE
@@ -44,8 +43,8 @@ series:
     filters:
       divisions:
         exclude:
-          - "NFC.*"
-    min_competitors: [0, 5, 10]
+          - "NFC"
+    min_competitors: [1, 6, 11]
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
@@ -53,19 +52,14 @@ series:
       first_line: "{{ division_code(division) }} DIVISION"
       second_line: "{{ division_place(place) }}"
 
-  most_accurate_iron_sight:
+  most_accurate_iron_sights:
     type: most_accurate
     group_by: []
     filters:
       divisions:
         include:
-          - "CPI.*"
-          - "FSI.*"
-          - "LCI.*"
-          - "REV.*"
-        exclude:
-          - "NFC.*"
-    min_competitors: [0]
+          - "CCP|CDP|ESP|SSP"
+    min_competitors: [1]
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties:
@@ -75,25 +69,38 @@ series:
       second_line: "IRON SIGHTS"
       third_line: "{{ shooter.points_down }} PD"
 
-  most_accurate_optics:
+  most_accurate_carry_optics:
     type: most_accurate
     group_by: []
     filters:
       divisions:
         include:
-          - "CPO.*"
-          - "FSO.*"
-          - "LCO.*"
-        exclude:
-          - "NFC.*"
-    min_competitors: [0]
+          - "CO"
+    min_competitors: [1]
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties:
       - "Hits on Non-Threat"
     text:
       first_line: "MOST ACCURATE"
-      second_line: "OPTICS"
+      second_line: "CARRY OPTICS"
+      third_line: "{{ shooter.points_down }} PD"
+
+  most_accurate_pcc:
+    type: most_accurate
+    group_by: []
+    filters:
+      divisions:
+        include:
+          - "PCC"
+    min_competitors: [1]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties:
+      - "Hits on Non-Threat"
+    text:
+      first_line: "MOST ACCURATE"
+      second_line: "PCC"
       third_line: "{{ shooter.points_down }} PD"
 
   best_lady:
@@ -103,12 +110,12 @@ series:
     filters:
       divisions:
         exclude:
-          - "NFC.*"
+          - "NFC"
       categories:
         include:
-          - "Lady.*"
+          - "Lady"
         exclude: []
-    min_competitors: [0]
+    min_competitors: [1]
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
@@ -123,30 +130,14 @@ series:
     filters:
       divisions:
         exclude:
-          - "NFC.*"
+          - "NFC"
       categories:
         exclude:
-          - "Lady.*"
-    min_competitors: [0, 5, 10]
+          - "^Lady$"
+    min_competitors: [1, 6, 11]
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
     text:
       first_line: "HIGH"
       second_line: "{{ category_code_map(category) }}"
-
-  fastest:
-    type: fastest
-    group_by: []
-    filters:
-      divisions:
-        exclude:
-          - "NFC.*"
-    min_competitors: [0]
-    exclude_dq: true
-    exclude_dnf: true
-    ineligible_penalties: []
-    text:
-      first_line: "FASTEST"
-      second_line: "OVERALL"
-      third_line: "{{ shooter.raw_time }} s"

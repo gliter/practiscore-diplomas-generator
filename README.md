@@ -1,5 +1,7 @@
 # PractiScore Diplomas Generator
 
+User documentation: [English](docs/README.en.md) | [Polski](docs/README.pl.md)
+
 Python tooling for turning PractiScore match exports into diplomas. The project is being built feature by feature. The current implementation parses a match and generates both the shooter summary and diploma-selection data.
 
 ## Current Feature
@@ -34,25 +36,25 @@ uv sync
 Point the command at a `.pcs` or `.psc` PractiScore ZIP export:
 
 ```powershell
-uv run practiscore-diplomas parse "match-export.pcs"
+uv run practiscore-diplomas parse -i "match-export.pcs" -c "configs\gpa_t1_config.yaml"
 ```
 
-This creates `shooters-summary.yaml` and `diplomas-data.yaml` in the current directory. An unpacked export directory containing `match_def.json` and `match_scores.json` is also accepted:
+This creates `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml` in the current directory, with spaces in the match name replaced by hyphens. A configuration must be provided with `--config`; example configurations are in `configs/`. An unpacked export directory containing `match_def.json` and `match_scores.json` is also accepted:
 
 ```powershell
-uv run practiscore-diplomas parse "path\to\unpacked-export"
+uv run practiscore-diplomas parse -i "path\to\unpacked-export" -c "configs\gpa_t1_config.yaml"
 ```
 
-The diploma-selection configuration defaults to `config.yaml`. Output and config paths can be overridden with explicit long options:
+Output and config paths can be set with explicit long options:
 
 ```powershell
-uv run practiscore-diplomas parse "match-export.pcs" `
-  --config "competition.yaml" `
-  --summary-output "results\match-summary.yaml" `
-  --diplomas-output "results\diplomas-data.yaml"
+uv run practiscore-diplomas parse -i "match-export.pcs" `
+  -c "competition.yaml" `
+  -s "results\match-summary.yaml" `
+  -d "results\diplomas-data.yaml"
 ```
 
-`diplomas-data.yaml` is keyed by configured series and contains placement, division/class/category context, ranking metric, and complete shooter details. Filter values are regular expressions; `*` is the explicit match-all value, so `CPI.*` matches the complete CPI division label. Filters can use `include` and `exclude`; a value must match an include pattern and must not match an exclude pattern. The whole `filters` section, an individual dimension filter, `include`, or `exclude` can be omitted: omitted filters include everything and exclude nothing. `min_competitors: [5, 7]` means one diploma for 5 or more eligible competitors and two for 7 or more.
+`diplomas-data-<match name>.yaml` is keyed by configured series and contains placement, division/class/category context, ranking metric, and complete shooter details. Filter values are regular expressions; `*` is the explicit match-all value, so `CPI.*` matches the complete CPI division label. Filters can use `include` and `exclude`; a value must match an include pattern and must not match an exclude pattern. The whole `filters` section, an individual dimension filter, `include`, or `exclude` can be omitted: omitted filters include everything and exclude nothing. `min_competitors: [1, 6, 11]` means one diploma for 1–5 eligible competitors, two for 6–10, and three for 11 or more. A threshold of `1` prevents a series with no eligible competitors from producing a diploma.
 
 Each series also defines `text.first_line` and `text.second_line`; optional `third_line` and `fourth_line` can be added. Templates support fields such as `{{ place }}`, `{{ shooter.raw_time }}`, and global map calls such as `{{ division_code(division) }}` or `{{ class_code(shooter.class) }}`. Global maps use regex keys for text values and integer keys for places. Missing mappings are reported as configuration errors.
 
@@ -62,11 +64,23 @@ Render the intermediate diploma data into one DOCX file using a DOCX template:
 
 ```powershell
 uv run practiscore-diplomas render `
-  --template "diploma-template.docx" `
+  -d "diplomas-data-MATCH.yaml" `
+  -t "diploma-template.docx" `
   -o "diplomas.docx"
 ```
 
-The command reads `diplomas-data.yaml` by default. Override it with `--diplomas-input`. The template is cloned once for each diploma record, in series and ranking order. Placeholders use `{{ field }}` syntax and can refer to `first_line`, `second_line`, optional `third_line`/`fourth_line`, `place`, `division`, `category`, `class`, `metric_value`, or shooter fields such as `{{ shooter.raw_time }}` and `{{ shooter.points_down }}`. Placeholders in document paragraphs and tables are supported. Missing optional third and fourth lines render as empty text; other missing or unknown fields are errors.
+The command can also parse and render a match directly:
+
+```powershell
+uv run practiscore-diplomas render `
+  -i "match-export.pcs" `
+  -c "configs\gpa_t1_config.yaml" `
+  -t "diploma-template.docx"
+```
+
+The output defaults to `diplomas.docx` for diploma-data input and `diplomas-<match-name>.docx` for direct match input. The template is cloned once for each diploma record, in series and ranking order. Placeholders use `{{ field }}` syntax and can refer to `first_line`, `second_line`, optional `third_line`/`fourth_line`, `place`, `division`, `category`, `class`, `metric_value`, or shooter fields such as `{{ shooter.raw_time }}` and `{{ shooter.points_down }}`. Placeholders in document paragraphs and tables are supported. Missing optional third and fourth lines render as empty text; other missing or unknown fields are errors.
+
+When direct match input is used, the command also writes `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml` in the current directory. Review or edit the diploma data, then use the two-step `parse` → `render` workflow when manual changes are needed.
 
 ## Python API
 

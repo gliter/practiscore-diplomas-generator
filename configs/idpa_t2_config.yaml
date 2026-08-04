@@ -1,0 +1,243 @@
+exclude_shooters:
+  surnames:
+    - "(?i)par"
+  ids: []
+
+mark_chrono_failure_as_dnf: true
+
+maps:
+  division_code:
+    "CCP": CCP
+    "CDP": CDP
+    "ESP": ESP
+    "SSP": SSP
+    "CO": CO
+    "PCC": PCC
+  category_code_map:
+    "Junior.*": JUNIOR
+    "Senior.*": SENIOR
+    "Distinguished Senior.*": DISTINGUISHED SENIOR
+    "Lady": LADY
+    "International.*": INTERNATIONAL
+    "Industry": INDUSTRY
+    "Law Enforcement": LAW ENFORCEMENT
+    "Military": MILITARY
+  class_code_map:
+    "DM": DISTINGUISHED MASTER
+    "MA": MASTER
+    "EX": EXPERT
+    "SS": SHARPSHOOTER
+    "MM": MARKSMAN
+    "NV": NOVICE
+    "UN": UNCLASSIFIED
+  division_place:
+    1: CHAMPION
+    2: 2nd PLACE
+    3: 3rd PLACE
+    4: 4th PLACE
+    5: 5th PLACE
+  class_place:
+    1: 1st PLACE
+    2: 2nd PLACE
+    3: 3rd PLACE
+    4: 4th PLACE
+    5: 5th PLACE
+
+series:
+  best_in_division:
+    type: best_shooter
+    group_by:
+      - division
+    filters:
+      divisions:
+        exclude:
+          - "NFC"
+    min_competitors: [1]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "{{ division_code(division) }} DIVISION"
+      second_line: "{{ division_place(place) }}"
+
+  best_in_division_class:
+    type: best_shooter
+    group_by:
+      - division
+      - class
+    filters:
+      divisions:
+        exclude:
+          - "NFC"
+    min_competitors: [1, 6, 11, 16, 21]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "{{ division }} / {{ class }}"
+      second_line: "{{ class_place(place) }}"
+
+  most_accurate_iron_sights:
+    type: most_accurate
+    group_by: []
+    filters:
+      divisions:
+        include:
+          - "CCP|CDP|ESP|SSP"
+    min_competitors: [1]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties:
+      - "Hits on Non-Threat"
+    text:
+      first_line: "MOST ACCURATE"
+      second_line: "IRON SIGHTS"
+      third_line: "{{ shooter.points_down }} PD"
+
+  most_accurate_carry_optics:
+    type: most_accurate
+    group_by: []
+    filters:
+      divisions:
+        include:
+          - "CO"
+    min_competitors: [1]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties:
+      - "Hits on Non-Threat"
+    text:
+      first_line: "MOST ACCURATE"
+      second_line: "CARRY OPTICS"
+      third_line: "{{ shooter.points_down }} PD"
+
+  most_accurate_pcc:
+    type: most_accurate
+    group_by: []
+    filters:
+      divisions:
+        include:
+          - "PCC"
+    min_competitors: [1]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties:
+      - "Hits on Non-Threat"
+    text:
+      first_line: "MOST ACCURATE"
+      second_line: "PCC"
+      third_line: "{{ shooter.points_down }} PD"
+
+  best_lady_iron_sights:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        include:
+          - "CCP|CDP|ESP|SSP"
+      categories:
+        include:
+          - "Lady"
+    min_competitors: [3]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }} IRON SIGHTS"
+
+  best_lady_carry_optics:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        include:
+          - "CO"
+      categories:
+        include:
+          - "Lady"
+    min_competitors: [3]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }} CARRY OPTICS"
+
+  best_lady_pcc:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        include:
+          - "PCC"
+      categories:
+        include:
+          - "Lady"
+    min_competitors: [3]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }} PCC"
+
+  best_in_category_iron_sights:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        include:
+          - "CCP|CDP|ESP|SSP"
+      categories:
+        exclude:
+          - "Lady"
+    min_competitors: [3]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }} IRON SIGHTS"
+
+  best_in_category_carry_optics:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        include:
+          - "CO"
+      categories:
+        exclude:
+          - "Lady"
+    min_competitors: [3]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }} CARRY OPTICS"
+
+  best_in_category_pcc:
+    type: best_shooter
+    group_by:
+      - category
+    filters:
+      divisions:
+        include:
+          - "PCC"
+      categories:
+        exclude:
+          - "Lady"
+    min_competitors: [3]
+    exclude_dq: true
+    exclude_dnf: true
+    ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }} PCC"

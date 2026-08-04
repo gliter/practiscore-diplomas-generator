@@ -10,6 +10,7 @@ from practiscore_diplomas.parser import MatchParseError, MatchData, parse_match,
 def make_data() -> MatchData:
     return MatchData(
         {
+            "match_name": "Synthetic Match",
             "match_pointsdownvalue": 0.5,
             "match_steelmisspdcount": 10,
             "match_penalties": [{"pen_name": "Miss", "pen_val": 5}, {"pen_name": "Procedural Error", "pen_val": 3}],

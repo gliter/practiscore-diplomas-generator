@@ -16,6 +16,7 @@ from docx.text.paragraph import Paragraph
 from docx.enum.text import WD_BREAK
 
 
+
 class DiplomaRenderError(ValueError):
     """Raised when diploma data or a DOCX template cannot be rendered."""
 
@@ -34,12 +35,7 @@ _TOP_LEVEL_FIELDS = {
 }
 
 
-def _load_records(path: Path) -> list[Mapping[str, Any]]:
-    try:
-        with path.open("r", encoding="utf-8") as stream:
-            raw = yaml.safe_load(stream)
-    except (OSError, yaml.YAMLError) as exc:
-        raise DiplomaRenderError(f"Could not read diploma data {path}: {exc}") from exc
+def _records_from_data(raw: Any) -> list[Mapping[str, Any]]:
     if not isinstance(raw, dict) or not isinstance(raw.get("diplomas"), dict):
         raise DiplomaRenderError("Diploma data must contain a 'diplomas' mapping")
     records: list[Mapping[str, Any]] = []
@@ -53,6 +49,15 @@ def _load_records(path: Path) -> list[Mapping[str, Any]]:
     if not records:
         raise DiplomaRenderError("Diploma data contains no diploma records")
     return records
+
+
+def _load_records(path: Path) -> list[Mapping[str, Any]]:
+    try:
+        with path.open("r", encoding="utf-8") as stream:
+            raw = yaml.safe_load(stream)
+    except (OSError, yaml.YAMLError) as exc:
+        raise DiplomaRenderError(f"Could not read diploma data {path}: {exc}") from exc
+    return _records_from_data(raw)
 
 
 def _resolve(record: Mapping[str, Any], path: str, record_index: int) -> Any:
@@ -130,9 +135,7 @@ def _insert_before_section_properties(body: Any, block: Any) -> None:
         body.insert(body.index(section_properties), block)
 
 
-def render_diplomas(diplomas_path: str | Path, template_path: str | Path, output_path: str | Path) -> None:
-    """Render all diploma records into one DOCX file."""
-    records = _load_records(Path(diplomas_path))
+def _render_records(records: list[Mapping[str, Any]], template_path: str | Path, output_path: str | Path) -> None:
     template = Path(template_path)
     if not template.is_file():
         raise DiplomaRenderError(f"Template does not exist: {template}")
@@ -156,3 +159,13 @@ def render_diplomas(diplomas_path: str | Path, template_path: str | Path, output
         result.save(output)
     except OSError as exc:
         raise DiplomaRenderError(f"Could not write rendered DOCX {output}: {exc}") from exc
+
+
+def render_diplomas(diplomas_path: str | Path, template_path: str | Path, output_path: str | Path) -> None:
+    """Render diploma data from a YAML file into one DOCX file."""
+    _render_records(_load_records(Path(diplomas_path)), template_path, output_path)
+
+
+def render_diploma_data(data: Mapping[str, Any], template_path: str | Path, output_path: str | Path) -> None:
+    """Render already-generated diploma data without an intermediate YAML file."""
+    _render_records(_records_from_data(data), template_path, output_path)

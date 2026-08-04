@@ -3,6 +3,9 @@
 .test-deps/
 __pycache__/
 *.py[cod]
+*.spec
 .pytest_cache/
+build/
+dist/
 shooters-summary.yaml
 diplomas-data.yaml

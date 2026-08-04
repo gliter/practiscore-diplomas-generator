@@ -7,6 +7,7 @@ from docx import Document
 
 from practiscore_diplomas.render import DiplomaRenderError, render_diplomas
 from practiscore_diplomas.cli import main
+from tests.test_cli import write_config, write_export
 
 
 def write_template(path: Path) -> None:
@@ -100,14 +101,30 @@ def test_render_rejects_unknown_placeholder(tmp_path: Path):
         raise AssertionError("render_diplomas should reject unknown placeholders")
 
 
-def test_render_cli_uses_diplomas_data_default(tmp_path: Path, monkeypatch):
+def test_render_cli_requires_diplomas_data_input(tmp_path: Path, monkeypatch):
     template = tmp_path / "template.docx"
     data = tmp_path / "diplomas-data.yaml"
     output = tmp_path / "diplomas.docx"
     write_template(template)
     write_data(data)
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "render", "--template", str(template), "-o", str(output)])
+    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "render", "-d", str(data), "-t", str(template), "-o", str(output)])
 
     assert main() == 0
     assert output.is_file()
+
+
+def test_render_cli_can_parse_match_and_uses_match_name_output(tmp_path: Path, monkeypatch):
+    input_dir = tmp_path / "match"
+    template = tmp_path / "template.docx"
+    config = tmp_path / "config.yaml"
+    write_export(input_dir)
+    write_config(config)
+    write_template(template)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "render", "-i", str(input_dir), "-c", str(config), "-t", str(template)])
+
+    assert main() == 0
+    assert (tmp_path / "diplomas-Synthetic-Match.docx").is_file()
+    assert (tmp_path / "shooters-summary-Synthetic-Match.yaml").is_file()
+    assert (tmp_path / "diplomas-data-Synthetic-Match.yaml").is_file()

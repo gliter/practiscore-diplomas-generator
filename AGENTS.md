@@ -2,7 +2,7 @@
 
 ## Repository Purpose
 
-This repository contains a Python application that parses PractiScore exports, selects diploma recipients, and renders diploma documents. `parse` writes the intermediate shooter summary and diploma data; `render` turns diploma data and a DOCX template into the final document.
+This repository contains a Python application that parses PractiScore exports, selects diploma recipients, and renders diploma documents. `parse` writes the intermediate shooter summary and diploma data; `render` turns diploma data and a DOCX template into the final document. Product documentation is maintained in English and Polish under `docs/`.
 
 ## Development Setup
 
@@ -20,7 +20,9 @@ The project targets Python 3.10 or newer. Keep dependencies declared in `pyproje
 - `src/practiscore_diplomas/parser.py`: archive/directory loading and score aggregation.
 - `src/practiscore_diplomas/diplomas.py`: configuration validation, grouping, eligibility, ranking, and diploma-data generation.
 - `src/practiscore_diplomas/render.py`: DOCX template expansion and multi-page document assembly.
-- `src/practiscore_diplomas/cli.py`: `parse`/`render` command-line interface and YAML serialization.
+- `src/practiscore_diplomas/cli.py`: localized `parse`/`render` command-line interface and YAML serialization.
+- `scripts/build_windows.ps1`: PyInstaller executable and release ZIP builder.
+- `.github/workflows/release.yml`: Windows build and GitHub Release workflow for merged pull requests targeting `main`.
 - `tests/`: anonymized unit and CLI tests.
 - `diplom generator.md`: product specification and PractiScore field notes.
 
@@ -29,13 +31,13 @@ The parser reads only current `match_scores` data. `match_scores_history` is not
 ## CLI Contract
 
 ```text
-practiscore-diplomas parse INPUT [--config PATH] [--summary-output PATH] [--diplomas-output PATH]
-practiscore-diplomas render [--diplomas-input PATH] --template PATH -o PATH
+practiscore-diplomas [--language en|pl] parse -i INPUT -c PATH [-s PATH] [-d PATH]
+practiscore-diplomas render -d PATH -t PATH -o PATH
 ```
 
-The `parse` command defaults to `config.yaml`, `shooters-summary.yaml`, and `diplomas-data.yaml`. Do not introduce `-o` for intermediate outputs: `-o` is reserved for the final rendered diploma document. `render` defaults to `diplomas-data.yaml`, clones the DOCX template for every record in series/ranking order, and writes one output DOCX. It expands placeholders in body paragraphs and tables using `{{ field }}` syntax. Supported fields include the diploma lines, `place`, `division`, `category`, `class`, `metric_value`, and `shooter.<field>` values. Missing `third_line` and `fourth_line` values render empty; other missing or unknown placeholders are errors.
+The `parse` command requires `-i/--input` and `-c/--config`, then writes `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml`, replacing spaces in the match name with hyphens. `-s/--summary-output` and `-d/--diplomas-data` override those names. Help follows the system locale and can be overridden with `--language en|pl` before or after the command. Do not introduce `-o` for intermediate outputs: `-o` is reserved for the final rendered diploma document. `render` accepts either `-d/--diplomas-data` or direct `-i/--input`; direct input also requires `-c/--config`. With direct input it writes the standard shooter-summary and diploma-data YAML files before rendering the DOCX, so the intermediate results remain available for review. It clones the DOCX template for every record in series/ranking order and expands placeholders in body paragraphs and tables using `{{ field }}` syntax. Missing `third_line` and `fourth_line` values render empty; other missing or unknown placeholders are errors.
 
-Diploma configuration uses keyed series mappings. Filter values are regular expressions, with `*` reserved for match-all. Structured filters support `include` and `exclude`; include must match and exclude takes precedence. The filters section, dimensions, include lists, and exclude lists are optional; omitted values mean include all and exclude none. `min_competitors: [5, 7, 13]` produces one diploma at 5 eligible competitors, two at 7, and three at 13. Diploma output is keyed by series and contains placement plus explicit grouping context.
+Diploma configuration uses keyed series mappings. Filter values are regular expressions, with `*` reserved for match-all. Structured filters support `include` and `exclude`; include must match and exclude takes precedence. The filters section, dimensions, include lists, and exclude lists are optional; omitted values mean include all and exclude none. `min_competitors: [1, 6, 11]` produces one diploma for 1–5 eligible competitors, two for 6–10, and three for 11 or more. A threshold of `1` is required when an empty eligible group must produce no diploma. Diploma output is keyed by series and contains placement plus explicit grouping context.
 
 The optional top-level `exclude_shooters` mapping accepts regex lists under `surnames` and `ids`; matching shooters are excluded from every diploma series.
 
@@ -55,6 +57,7 @@ Feature 2b requires every series to define `text.first_line` and `text.second_li
 - Use synthetic names, emails, IDs, and match data in tests and documentation. Never copy personal data from the supplied exports.
 - Keep changes scoped to the requested feature and avoid unrelated formatting or refactoring.
 - Keep DOCX rendering tests synthetic and verify both paragraph and table placeholder replacement.
+- Update both `docs/README.en.md` and `docs/README.pl.md` when changing user-visible behavior, configuration, CLI, templates, or packaging.
 
 ## Verification Checklist
 
