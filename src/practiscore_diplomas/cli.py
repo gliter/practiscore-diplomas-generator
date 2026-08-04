@@ -39,8 +39,9 @@ def main() -> int:
         parser.error("render is reserved for a future feature")
     try:
         match = load_match_data(args.input)
-        summary = parse_match_data(match)
         configs = load_config(args.config)
+        mark_chrono_failure_as_dnf = next(iter(configs.values())).mark_chrono_failure_as_dnf
+        summary = parse_match_data(match, mark_chrono_failure_as_dnf=mark_chrono_failure_as_dnf)
         diplomas = generate_diplomas(summary, match.definition, configs)
         _write_yaml(args.summary_output, summary)
         _write_yaml(args.diplomas_output, diplomas)

@@ -54,6 +54,8 @@ uv run practiscore-diplomas parse "match-export.pcs" `
 
 `diplomas-data.yaml` is keyed by configured series and contains placement, division/class/category context, ranking metric, and complete shooter details. Filter values are regular expressions; `*` is the explicit match-all value, so `CPI.*` matches the complete CPI division label. Filters can use `include` and `exclude`; a value must match an include pattern and must not match an exclude pattern. The whole `filters` section, an individual dimension filter, `include`, or `exclude` can be omitted: omitted filters include everything and exclude nothing. `min_competitors: [5, 7]` means one diploma for 5 or more eligible competitors and two for 7 or more.
 
+Each series also defines `text.first_line` and `text.second_line`; optional `third_line` and `fourth_line` can be added. Templates support fields such as `{{ place }}`, `{{ shooter.raw_time }}`, and global map calls such as `{{ division_code(division) }}` or `{{ class_code(shooter.class) }}`. Global maps use regex keys for text values and integer keys for places. Missing mappings are reported as configuration errors.
+
 The `render` command is reserved for the future DOCX diploma-generation feature. The `-o` option is reserved for that final document output.
 
 ## Python API
@@ -89,3 +91,5 @@ exclude_shooters:
   surnames: ["(?i)^par$"]
   ids: ["^GPA0$"]
 ```
+
+Chronograph stages are detected from `stage_scoretype: Chrono`. By default, a shooter whose Chrono result does not have `gear_check: Pass` is marked DNF. This can be disabled with `mark_chrono_failure_as_dnf: false`.

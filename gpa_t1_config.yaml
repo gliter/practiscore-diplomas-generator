@@ -3,6 +3,39 @@ exclude_shooters:
     - "(?i)^par$"
   ids: []
 
+mark_chrono_failure_as_dnf: true
+
+maps:
+  division_code:
+    "CPI.*": CPI
+    "FSI.*": FSI
+    "LCI.*": LCI
+    "REV.*": REV
+    "CPO.*": CPO
+    "FSO.*": FSO
+    "LCO.*": LCO
+  category_code_map:
+    "Junior.*": JUNIOR
+    "Senior.*": SENIOR
+    "Super Senior.*": SUPER SENIOR
+    "Lady.*": LADY
+    "International.*": INTERNATIONAL
+    "Industry.*": INDUSTRY
+    "Law Enforcement.*": LAW ENFORCEMENT
+    "Military.*": MILITARY
+    "Veteran.*": VETERAN
+  class_code_map:
+    "Double Platinum.*": DOUBLE PLATINUM
+    "Platinum.*": PLATINUM
+    "Gold.*": GOLD
+    "Silver.*": SILVER
+    "Bronze.*": BRONZE
+    "Pew Pewter.*": PEW PEWTER
+  division_place:
+    1: CHAMPION
+    2: 2nd PLACE
+    3: 3rd PLACE
+
 series:
   best_in_division:
     type: best_shooter
@@ -16,6 +49,9 @@ series:
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
+    text:
+      first_line: "{{ division_code(division) }} DIVISION"
+      second_line: "{{ division_place(place) }}"
 
   most_accurate_iron_sight:
     type: most_accurate
@@ -34,6 +70,10 @@ series:
     exclude_dnf: true
     ineligible_penalties:
       - "Hits on Non-Threat"
+    text:
+      first_line: "MOST ACCURATE"
+      second_line: "IRON SIGHTS"
+      third_line: "{{ shooter.points_down }} PD"
 
   most_accurate_optics:
     type: most_accurate
@@ -51,6 +91,10 @@ series:
     exclude_dnf: true
     ineligible_penalties:
       - "Hits on Non-Threat"
+    text:
+      first_line: "MOST ACCURATE"
+      second_line: "OPTICS"
+      third_line: "{{ shooter.points_down }} PD"
 
   best_lady:
     type: best_shooter
@@ -68,6 +112,9 @@ series:
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }}"
 
   best_in_category:
     type: best_shooter
@@ -84,6 +131,9 @@ series:
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
+    text:
+      first_line: "HIGH"
+      second_line: "{{ category_code_map(category) }}"
 
   fastest:
     type: fastest
@@ -96,3 +146,7 @@ series:
     exclude_dq: true
     exclude_dnf: true
     ineligible_penalties: []
+    text:
+      first_line: "FASTEST"
+      second_line: "OVERALL"
+      third_line: "{{ shooter.raw_time }} s"

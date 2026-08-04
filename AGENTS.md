@@ -38,6 +38,10 @@ Diploma configuration uses keyed series mappings. Filter values are regular expr
 
 The optional top-level `exclude_shooters` mapping accepts regex lists under `surnames` and `ids`; matching shooters are excluded from every diploma series.
 
+`mark_chrono_failure_as_dnf` defaults to `true`. Chrono stages are identified by `stage_scoretype: Chrono`, and any result without `gear_check: Pass` marks that shooter DNF.
+
+Feature 2b requires every series to define `text.first_line` and `text.second_line`; `third_line` and `fourth_line` are optional. Templates support raw fields (`division`, `category`, `class`, `place`, `type`), explicit shooter fields such as `shooter.raw_time` and `shooter.points_down`, and named global map calls such as `{{ division_code(division) }}` or `{{ class_code(shooter.class) }}`. Map misses are errors; do not add unrestricted expression evaluation.
+
 ## Implementation Rules
 
 - Preserve the existing public parser API unless a feature requires a deliberate change.

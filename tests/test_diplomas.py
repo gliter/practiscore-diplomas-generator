@@ -1,4 +1,5 @@
 import pytest
+import yaml
 
 from practiscore_diplomas.diplomas import DiplomaDataError, generate_diplomas, load_config
 from tests.test_parser import make_data
@@ -6,7 +7,10 @@ from tests.test_parser import make_data
 
 def config_file(tmp_path, text):
     path = tmp_path / "config.yaml"
-    path.write_text(text, encoding="utf-8")
+    config = yaml.safe_load(text)
+    for series in config.get("series", {}).values():
+        series.setdefault("text", {"first_line": "{{ type }}", "second_line": "{{ place }}"})
+    path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
     return path
 
 
@@ -36,6 +40,8 @@ def test_generates_grouped_ranked_records_and_thresholds(tmp_path):
     assert records[0]["class"] == "Gold"
     assert records[0]["category"] is None
     assert records[0]["shooter"]["shooter_id"] == "GPA-002"
+    assert records[0]["first_line"] == "best_shooter"
+    assert records[0]["second_line"] == "1"
     assert "eligible_competitors" not in records[0]
     assert "qualification_threshold" not in records[0]
 
@@ -134,6 +140,15 @@ series:
     assert [item["shooter"]["first_name"] for item in output] == ["C"]
 
 
+def test_chrono_setting_defaults_to_true(tmp_path):
+    config = load_config(config_file(tmp_path, """series:
+  fastest:
+    type: fastest
+    min_competitors: [0]
+"""))
+    assert config["fastest"].mark_chrono_failure_as_dnf is True
+
+
 def test_rejects_invalid_filter_regular_expression(tmp_path):
     with pytest.raises(DiplomaDataError, match="regular expression"):
         load_config(config_file(tmp_path, """series:
@@ -143,3 +158,73 @@ def test_rejects_invalid_filter_regular_expression(tmp_path):
       divisions: ['[']
     min_competitors: [0]
 """))
+
+
+def test_renders_global_maps_and_raw_variables(tmp_path):
+    data = make_data()
+    config = load_config(config_file(tmp_path, """maps:
+      division_code:
+        FSO.*: FSO
+      place_text:
+        1: WINNER
+series:
+  award:
+    type: best_shooter
+    group_by: [division]
+    min_competitors: [0]
+    text:
+      first_line: '{{ division_code(division) }} DIVISION'
+      second_line: '{{ place_text(place) }} {{ type }}'
+      third_line: 'TIME {{ shooter.raw_time }} PD {{ shooter.points_down }}'
+      fourth_line: '{{ shooter.last_name }} {{ shooter.shooter_id }}'
+"""))
+    summary = {"a": {"shooter_id": "ID-A", "first_name": "A", "last_name": "A", "division": "FSO (Full Size Optic)", "class": "Gold", "categories": [], "raw_time": 1, "total_time": 1, "points_down": 0, "steel_misses": 0, "penalties": {}, "dnf": False, "dq": False}}
+    record = generate_diplomas(summary, data.definition, config)["diplomas"]["award"][0]
+    assert record["first_line"] == "FSO DIVISION"
+    assert record["second_line"] == "WINNER best_shooter"
+    assert record["third_line"] == "TIME 1 PD 0"
+    assert record["fourth_line"] == "A ID-A"
+
+
+def test_shooter_value_can_be_used_as_map_input(tmp_path):
+    config = load_config(config_file(tmp_path, """maps:
+  class_code:
+    Gold.*: GOLD
+series:
+  award:
+    type: fastest
+    min_competitors: [0]
+    text:
+      first_line: '{{ class_code(shooter.class) }}'
+      second_line: '{{ shooter.total_time }}'
+"""))
+    summary = {"a": {"first_name": "A", "last_name": "A", "shooter_id": "ID-1", "division": "FSO", "class": "Gold (78%)", "categories": [], "raw_time": 1, "total_time": 1, "points_down": 0, "steel_misses": 0, "penalties": {}, "dnf": False, "dq": False}}
+    record = generate_diplomas(summary, make_data().definition, config)["diplomas"]["award"][0]
+    assert record["first_line"] == "GOLD"
+    assert record["second_line"] == "1"
+
+
+def test_requires_text_for_each_series(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text("series:\n  missing:\n    type: fastest\n    min_competitors: [0]\n", encoding="utf-8")
+    with pytest.raises(DiplomaDataError, match="text"):
+        load_config(path)
+
+
+def test_rejects_missing_map_entry(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text("""maps:
+  place_text:
+    2: RUNNER-UP
+series:
+  award:
+    type: fastest
+    min_competitors: [0]
+    text:
+      first_line: '{{ place_text(place) }}'
+      second_line: '{{ place_text(place) }}'
+""", encoding="utf-8")
+    config = load_config(path)
+    summary = {"a": {"first_name": "A", "last_name": "A", "division": "FSO", "class": "Gold", "categories": [], "raw_time": 1, "total_time": 1, "points_down": 0, "steel_misses": 0, "penalties": {}, "dnf": False, "dq": False}}
+    with pytest.raises(DiplomaDataError, match="no mapping"):
+        generate_diplomas(summary, make_data().definition, config)

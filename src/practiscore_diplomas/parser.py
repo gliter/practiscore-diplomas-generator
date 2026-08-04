@@ -123,7 +123,7 @@ def _shooters(definition: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     return result
 
 
-def _score_rows(scores: Mapping[str, Any]) -> Iterable[tuple[int, Mapping[str, Any]]]:
+def _score_rows(scores: Mapping[str, Any]) -> Iterable[tuple[int, str | None, Mapping[str, Any]]]:
     stages = scores.get("match_scores", [])
     if not isinstance(stages, list):
         raise MatchParseError("match_scores must be an array")
@@ -136,13 +136,18 @@ def _score_rows(scores: Mapping[str, Any]) -> Iterable[tuple[int, Mapping[str, A
         for row in rows:
             if not isinstance(row, dict) or not row.get("shtr"):
                 raise MatchParseError("Every score row must have a shtr")
-            yield stage_index, row
+            yield stage_index, stage.get("stage_uuid"), row
 
 
-def parse_match_data(data: MatchData) -> dict[str, dict[str, Any]]:
+def parse_match_data(data: MatchData, mark_chrono_failure_as_dnf: bool = True) -> dict[str, dict[str, Any]]:
     definition = data.definition
     shooter_map = _shooters(definition)
     stage_count = len(data.scores.get("match_scores", []))
+    chrono_stage_uuids = {
+        str(stage.get("stage_uuid"))
+        for stage in definition.get("match_stages", [])
+        if isinstance(stage, dict) and str(stage.get("stage_scoretype", "")).casefold() == "chrono" and stage.get("stage_uuid")
+    }
     points_down_value = _decimal(definition.get("match_pointsdownvalue"))
     steel_miss_count = _decimal(definition.get("match_steelmisspdcount"))
     penalty_defs = definition.get("match_penalties", []) or []
@@ -155,12 +160,14 @@ def parse_match_data(data: MatchData) -> dict[str, dict[str, Any]]:
         penalty_values[str(penalty["pen_name"])] = _decimal(penalty.get("pen_val"))
 
     aggregates: dict[str, dict[str, Any]] = defaultdict(
-        lambda: {"raw_time": Decimal(0), "penalties": defaultdict(int), "points_down": 0, "steel_misses": 0, "dnf": False, "stages": set()}
+        lambda: {"raw_time": Decimal(0), "penalties": defaultdict(int), "points_down": 0, "steel_misses": 0, "dnf": False, "chrono_failed": False, "stages": set()}
     )
-    for stage_index, row in _score_rows(data.scores):
+    for stage_index, stage_uuid, row in _score_rows(data.scores):
         uid = str(row["shtr"])
         aggregate = aggregates[uid]
         aggregate["stages"].add(stage_index)
+        if mark_chrono_failure_as_dnf and stage_uuid in chrono_stage_uuids and row.get("gear_check") != "Pass":
+            aggregate["chrono_failed"] = True
         aggregate["raw_time"] += _sum_numbers(row.get("str"))
         counts = row.get("pens", []) or []
         if not isinstance(counts, list):
@@ -186,7 +193,7 @@ def parse_match_data(data: MatchData) -> dict[str, dict[str, Any]]:
         point_seconds = Decimal(aggregate["points_down"]) * points_down_value
         steel_seconds = Decimal(aggregate["steel_misses"]) * steel_miss_count * points_down_value
         penalty_seconds = declared_seconds + point_seconds + steel_seconds
-        dnf = bool(aggregate["dnf"] or len(aggregate["stages"]) < stage_count)
+        dnf = bool(aggregate["dnf"] or aggregate["chrono_failed"] or len(aggregate["stages"]) < stage_count)
         dq = bool(shooter.get("sh_dq", False))
         output[uid] = {
             "shooter_id": shooter.get("sh_id", ""),

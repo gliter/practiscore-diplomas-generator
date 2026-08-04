@@ -22,6 +22,9 @@ def write_config(path: Path) -> None:
     type: best_shooter
     group_by: []
     min_competitors: [1]
+    text:
+      first_line: "{{ type }}"
+      second_line: "{{ place }}"
 """,
         encoding="utf-8",
     )

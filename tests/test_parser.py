@@ -64,6 +64,15 @@ def test_marks_shooter_with_missing_stage_as_dnf():
     assert result["shooter-a"]["dnf"] is True
 
 
+def test_marks_failed_chrono_as_dnf_when_enabled():
+    data = make_data()
+    definition = dict(data.definition)
+    definition["match_stages"] = [{"stage_uuid": "chrono", "stage_scoretype": "Chrono"}]
+    scores = {"match_scores": [{"stage_uuid": "chrono", "stage_stagescores": [{"shtr": "shooter-a", "gear_check": "Fail", "str": [0]}]}]}
+    assert parse_match_data(MatchData(definition, scores))["shooter-a"]["dnf"] is True
+    assert parse_match_data(MatchData(definition, scores), mark_chrono_failure_as_dnf=False)["shooter-a"]["dnf"] is False
+
+
 def test_reads_archive_and_directory(tmp_path: Path):
     directory = tmp_path / "export"
     directory.mkdir()
