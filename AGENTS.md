@@ -19,7 +19,7 @@ The project targets Python 3.10 or newer. Keep dependencies declared in `pyproje
 
 - `src/practiscore_diplomas/parser.py`: archive/directory loading and score aggregation.
 - `src/practiscore_diplomas/diplomas.py`: configuration validation, grouping, eligibility, ranking, and diploma-data generation.
-- `src/practiscore_diplomas/render.py`: DOCX template expansion and multi-page document assembly.
+- `src/practiscore_diplomas/render.py`: DOCX/ODT template expansion, format conversion, and multi-page document assembly.
 - `src/practiscore_diplomas/cli.py`: localized `parse`/`render` command-line interface and YAML serialization.
 - `scripts/build_windows.ps1`: PyInstaller executable and release ZIP builder.
 - `.github/workflows/release.yml`: Windows build and GitHub Release workflow for merged pull requests targeting `main`.
@@ -32,10 +32,10 @@ The parser reads only current `match_scores` data. `match_scores_history` is not
 
 ```text
 practiscore-diplomas [--language en|pl] parse -i INPUT -c PATH [-s PATH] [-d PATH]
-practiscore-diplomas render -d PATH -t PATH -o PATH
+practiscore-diplomas render -d PATH -t PATH [--output-docx PATH | --output-odt PATH | --output-pdf PATH]
 ```
 
-The `parse` command requires `-i/--input` and `-c/--config`, then writes `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml`, replacing spaces in the match name with hyphens. `-s/--summary-output` and `-d/--diplomas-data` override those names. Help follows the system locale and can be overridden with `--language en|pl` before or after the command. Do not introduce `-o` for intermediate outputs: `-o` is reserved for the final rendered diploma document. `render` accepts either `-d/--diplomas-data` or direct `-i/--input`; direct input also requires `-c/--config`. With direct input it writes the standard shooter-summary and diploma-data YAML files before rendering the DOCX, so the intermediate results remain available for review. It clones the DOCX template for every record in series/ranking order and expands placeholders in body paragraphs and tables using `{{ field }}` syntax. Missing `third_line` and `fourth_line` values render empty; other missing or unknown placeholders are errors.
+The `parse` command requires `-i/--input` and `-c/--config`, then writes `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml`, replacing spaces in the match name with hyphens. `-s/--summary-output` and `-d/--diplomas-data` override those names. Help follows the system locale and can be overridden with `--language en|pl` before or after the command. Do not introduce `-o` for intermediate outputs: `-o` is reserved for the final rendered diploma document. `render` accepts either `-d/--diplomas-data` or direct `-i/--input`; direct input also requires `-c/--config`. With direct input it writes the standard shooter-summary and diploma-data YAML files before rendering. Use one mutually exclusive output option: `--output-docx` (`-o` alias), `--output-odt`, or `--output-pdf`; if omitted, the output format follows the template. PDF conversion requires LibreOffice/`soffice` on `PATH`. It clones the DOCX or ODT template for every record in series/ranking order and expands placeholders in text paragraphs and tables using `{{ field }}` syntax. Missing `third_line` and `fourth_line` values render empty; other missing or unknown placeholders are errors.
 
 Diploma configuration uses keyed series mappings. Filter values are regular expressions, with `*` reserved for match-all. Structured filters support `include` and `exclude`; include must match and exclude takes precedence. The filters section, dimensions, include lists, and exclude lists are optional; omitted values mean include all and exclude none. `min_competitors: [1, 6, 11]` produces one diploma for 1–5 eligible competitors, two for 6–10, and three for 11 or more. A threshold of `1` is required when an empty eligible group must produce no diploma. Diploma output is keyed by series and contains placement plus explicit grouping context.
 

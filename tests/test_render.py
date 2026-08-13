@@ -56,6 +56,17 @@ def write_data(path: Path) -> None:
     )
 
 
+def write_odt_template(path: Path) -> None:
+    content = """<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0">
+  <office:automatic-styles><style:style style:name="Centered" style:family="paragraph"><style:paragraph-properties fo:text-align="center"/></style:style></office:automatic-styles>
+  <office:body><office:text><text:p text:style-name="Centered">{{ first_line }} / {{ shooter.last_name }}</text:p><text:p>{{ place }}</text:p></office:text></office:body>
+</office:document-content>"""
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("mimetype", "application/vnd.oasis.opendocument.text")
+        archive.writestr("content.xml", content)
+
+
 def test_render_creates_one_page_per_diploma_and_preserves_order(tmp_path: Path):
     template = tmp_path / "template.docx"
     data = tmp_path / "diplomas.yaml"
@@ -99,6 +110,63 @@ def test_render_rejects_unknown_placeholder(tmp_path: Path):
         assert "unknown placeholder" in str(exc)
     else:
         raise AssertionError("render_diplomas should reject unknown placeholders")
+
+
+def test_render_supports_odt_template(tmp_path: Path):
+    template = tmp_path / "template.odt"
+    data = tmp_path / "diplomas.yaml"
+    output = tmp_path / "result.odt"
+    write_odt_template(template)
+    write_data(data)
+
+    render_diplomas(data, template, output)
+
+    with zipfile.ZipFile(output) as archive:
+        content = archive.read("content.xml").decode("utf-8")
+    assert "FIRST / One" in content
+    assert "SECOND / Two" in content
+    assert "THIRD / Three" in content
+    assert "DiplomaPageBreak" in content
+    assert "parent-style-name=\"Centered\"" in content
+    assert "fo:text-align=\"center\"" in content
+    assert "{{" not in content
+
+
+def test_render_cli_accepts_output_odt(tmp_path: Path, monkeypatch):
+    template = tmp_path / "template.odt"
+    data = tmp_path / "diplomas-data.yaml"
+    output = tmp_path / "diplomas.odt"
+    write_odt_template(template)
+    write_data(data)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "render", "-d", str(data), "-t", str(template), "--output-odt", str(output)])
+
+    assert main() == 0
+    assert output.is_file()
+
+
+def test_render_odt_template_defaults_to_odt_output(tmp_path: Path, monkeypatch):
+    template = tmp_path / "template.odt"
+    data = tmp_path / "diplomas-data.yaml"
+    write_odt_template(template)
+    write_data(data)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "render", "-d", str(data), "-t", str(template)])
+
+    assert main() == 0
+    assert (tmp_path / "diplomas.odt").is_file()
+
+
+def test_render_output_option_can_use_default_path(tmp_path: Path, monkeypatch):
+    template = tmp_path / "template.odt"
+    data = tmp_path / "diplomas-data.yaml"
+    write_odt_template(template)
+    write_data(data)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "render", "-d", str(data), "-t", str(template), "--output-odt"])
+
+    assert main() == 0
+    assert (tmp_path / "diplomas.odt").is_file()
 
 
 def test_render_cli_requires_diplomas_data_input(tmp_path: Path, monkeypatch):

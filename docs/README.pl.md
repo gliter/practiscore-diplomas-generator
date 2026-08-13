@@ -96,18 +96,29 @@ maps:
 
 Tekst może korzystać z `division`, `category`, `class`, `place`, `type`, `shooter.<pole>` oraz wywołań map, np. `{{ division_code(division) }}`. Brak mapowania jest błędem konfiguracji.
 
-## Szablon DOCX
+## Szablon DOCX lub ODT
 
-Wygenerowane dane dyplomów renderuje się przy pomocy szablonu DOCX:
+Wygenerowane dane dyplomów renderuje się przy pomocy szablonu DOCX lub ODT:
 
 ```powershell
 practiscore-diplomas render `
   -d "diplomas-data-Plata-o-Plomo-2025.yaml" `
   -t "diploma-template.docx" `
-  -o "diplomas.docx"
+  --output-docx "diplomas.docx"
 ```
 
-Szablon jest kopiowany dla każdego rekordu dyplomu w kolejności serii i rankingu. Wynikiem jest jeden dokument DOCX z jedną stroną na dyplom. Zmienne w akapitach i tabelach mają składnię `{{ pole }}`.
+Szablon jest kopiowany dla każdego rekordu dyplomu w kolejności serii i rankingu. Wynikiem jest dokument z jedną stroną na dyplom. Zmienne w akapitach i tabelach mają składnię `{{ pole }}`. Opcja `--output-odt` zapisuje dokument ODT, a `--output-pdf` zapisuje PDF. Ścieżka po każdej opcji wyjścia jest opcjonalna, więc samo `--output-odt` utworzy plik `diplomas.odt`; własna ścieżka pozwala zmienić nazwę. Opcja `-o` jest skrótem dla `--output-docx`; trzy opcje wyjścia wykluczają się wzajemnie. Generowanie PDF wymaga zainstalowanego LibreOffice z programem `soffice` dostępnym w `PATH`.
+
+Szablon ODT renderowany do pliku ODT jest obsługiwany bezpośrednio przez program i nie wymaga LibreOffice:
+
+```powershell
+practiscore-diplomas render `
+  -d "diplomas-data-MECZ.yaml" `
+  -t "szablon-dyplomu.odt" `
+  --output-odt
+```
+
+LibreOffice jest potrzebny tylko do konwersji między DOCX i ODT albo do tworzenia plików PDF.
 
 Można też parsować i renderować bezpośrednio z eksportu meczu. W tym trybie konfiguracja jest wymagana. Polecenie zapisze również obok dokumentu pliki `shooters-summary-<nazwa-meczu>.yaml` i `diplomas-data-<nazwa-meczu>.yaml`, które można przejrzeć lub ręcznie zmienić:
 
@@ -124,4 +135,4 @@ Dostępne pola dyplomu to `first_line`, `second_line`, opcjonalne `third_line` i
 
 ## Przykładowy szablon
 
-W folderze programu znajduje się `example-diploma-template.docx`, czyli minimalny szablon zawierający tylko linie dyplomu oraz imię i nazwisko strzelca. Użyj go, aby sprawdzić cały proces przed przygotowaniem własnego szablonu.
+W folderze programu znajduje się `example-diploma-template.docx`, czyli minimalny szablon zawierający tylko linie dyplomu oraz imię i nazwisko strzelca. Szablony ODT używają tych samych zmiennych `{{ pole }}` w akapitach tekstowych. Użyj przykładowego szablonu, aby sprawdzić cały proces przed przygotowaniem własnego.

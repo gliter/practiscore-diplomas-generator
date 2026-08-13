@@ -96,18 +96,29 @@ maps:
 
 Text supports `division`, `category`, `class`, `place`, `type`, `shooter.<field>`, and map calls such as `{{ division_code(division) }}`. Missing mappings are configuration errors.
 
-## DOCX Template
+## DOCX or ODT Template
 
-Render the generated diploma data with a DOCX template:
+Render the generated diploma data with a DOCX or ODT template:
 
 ```powershell
 practiscore-diplomas render `
   -d "diplomas-data-Plata-o-Plomo-2025.yaml" `
   -t "diploma-template.docx" `
-  -o "diplomas.docx"
+  --output-docx "diplomas.docx"
 ```
 
-The template is cloned once for each diploma record, preserving configured series order and ranking order. The result is one DOCX with one diploma page per record. Placeholders in body paragraphs and tables use `{{ field }}` syntax.
+The template is cloned once for each diploma record, preserving configured series order and ranking order. The result has one diploma page per record. Placeholders in paragraphs and tables use `{{ field }}` syntax. Use `--output-odt` for an ODT document or `--output-pdf` for a PDF. The path after each output option is optional, so `--output-odt` creates `diplomas.odt`; provide a path to override it. `-o` is an alias for `--output-docx`; the three output options are mutually exclusive. PDF output requires LibreOffice with `soffice` available on `PATH`.
+
+An ODT template rendered to ODT output is handled directly by the program and does not require LibreOffice:
+
+```powershell
+practiscore-diplomas render `
+  -d "diplomas-data-MATCH.yaml" `
+  -t "diploma-template.odt" `
+  --output-odt
+```
+
+LibreOffice is needed only when converting between DOCX and ODT, or when creating PDF output.
 
 Alternatively, parse and render directly from a match export. The configuration is required in this mode. This command also writes `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml` next to the DOCX so you can review or edit the intermediate data:
 
@@ -124,4 +135,4 @@ Available diploma fields include `first_line`, `second_line`, optional `third_li
 
 ## Example Template
 
-The folder contains `example-diploma-template.docx`, a minimal template containing only the diploma lines and shooter name. Use it to verify the workflow before preparing your own template.
+The folder contains `example-diploma-template.docx`, a minimal template containing only the diploma lines and shooter name. ODT templates use the same `{{ field }}` placeholders in text paragraphs. Use the example template to verify the workflow before preparing your own template.
