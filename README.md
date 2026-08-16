@@ -33,10 +33,10 @@ uv sync
 
 ## Parse A Match
 
-Point the command at a `.pcs` or `.psc` PractiScore ZIP export:
+Point the command at a `.psc` PractiScore ZIP export:
 
 ```powershell
-uv run practiscore-diplomas parse -i "match-export.pcs" -c "configs\gpa_t1_config.yaml"
+uv run practiscore-diplomas parse -i "match-export.psc" -c "configs\gpa_t1_config.yaml"
 ```
 
 This creates `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml` in the current directory, with spaces in the match name replaced by hyphens. A configuration must be provided with `--config`; example configurations are in `configs/`. An unpacked export directory containing `match_def.json` and `match_scores.json` is also accepted:
@@ -48,7 +48,7 @@ uv run practiscore-diplomas parse -i "path\to\unpacked-export" -c "configs\gpa_t
 Output and config paths can be set with explicit long options:
 
 ```powershell
-uv run practiscore-diplomas parse -i "match-export.pcs" `
+uv run practiscore-diplomas parse -i "match-export.psc" `
   -c "competition.yaml" `
   -s "results\match-summary.yaml" `
   -d "results\diplomas-data.yaml"
@@ -73,7 +73,7 @@ The command can also parse and render a match directly:
 
 ```powershell
 uv run practiscore-diplomas render `
-  -i "match-export.pcs" `
+  -i "match-export.psc" `
   -c "configs\gpa_t1_config.yaml" `
   -t "diploma-template.docx"
 ```
@@ -89,7 +89,7 @@ The parser can also be used directly:
 ```python
 from practiscore_diplomas import parse_match
 
-summary = parse_match("match-export.pcs")
+summary = parse_match("match-export.psc")
 ```
 
 `parse_match` accepts either an archive path or an unpacked export directory. `parse_match_file` and `parse_match_directory` are available when the input type should be explicit.

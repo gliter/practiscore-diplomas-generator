@@ -1,70 +1,111 @@
 # PractiScore Diplomas Generator
 
-This tool reads a PractiScore `.pcs` or `.psc` export, selects diploma recipients according to a YAML configuration, and renders the selected diplomas into one DOCX file.
+Create diploma documents from a PractiScore match export. The program reads the results, applies your award rules, and creates one document containing all selected diplomas.
 
-## Running On Windows
+This guide is for match organizers. You do not need Python or any programming tools to use the Windows application.
 
-Run `practiscore-diplomas.exe` from PowerShell in the folder containing the executable. The executable does not require Python or `uv`. Keep the `configs` folder and the DOCX template next to it, or pass their full paths.
+## What You Need
 
-## Interactive Mode
+Before starting, prepare these files:
 
-Run the program without arguments to open an interactive menu. Use the up and down arrows and press Enter to choose one of these workflows:
+| Item | What it is |
+| --- | --- |
+| PractiScore export | The `.psc` file exported from PractiScore after the match. |
+| Configuration | A YAML file that defines award rules. Ready-to-use examples are in the `configs` folder. |
+| Diploma template | A `.docx` or `.odt` document containing the text placeholders described below. |
 
-- render directly from a PractiScore `.pcs` or `.psc` export;
-- render from a diploma-data YAML file;
-- parse a PractiScore export into the shooter summary and diploma-data YAML files.
+Keep the `configs` folder next to `practiscore-diplomas.exe`. You can keep match exports and templates in the same folder, which makes them easier to select.
 
-The menu lists configurations from `configs`, match and YAML files from the current directory, and DOCX/ODT templates from the current directory. Each picker also includes a `Choose file` option to open the system file dialog. If the dialog is cancelled, the picker returns to the list. Rendering uses a system save dialog with a suggested output name. A success message is displayed after the operation finishes.
+## Export The Match From PractiScore
 
-## Language
+Export the match only after scores and match status are final.
 
-Help follows the system locale. Polish systems use Polish help; other locales use English. Override it explicitly with `--language` either before or after the command:
+1. On the main match screen, choose **Import / Export**.
 
-```powershell
-practiscore-diplomas --language en --help
-practiscore-diplomas parse --language pl --help
-```
+   ![PractiScore main match screen with Import / Export highlighted](psc-1.png)
 
-## Parse A Match
+2. In the **Match Import/Export** section, choose **Export Match**.
 
-Parsing requires a configuration file:
+   ![PractiScore Import / Export screen with Export Match highlighted](psc-2.png)
 
-```powershell
-practiscore-diplomas parse `
-  -i "match-export.pcs" `
-  -c "configs\gpa_t1_config.yaml"
-```
+3. Save the exported match file. Select this file as the PractiScore export when creating diplomas.
 
-An unpacked export directory containing `match_def.json` and `match_scores.json` is also accepted. By default, parse writes:
+## Fastest Way To Create Diplomas
+
+1. Double-click `practiscore-diplomas.exe`.
+2. Use the up/down arrows and Enter to select **Render diplomas from a PractiScore file**.
+3. Choose the award configuration, the `.psc` match export, and the diploma template.
+4. In the save window, accept the suggested filename or choose another one.
+5. When the success message appears, open the generated document and check the first few diplomas before printing.
+
+The lists show files found in the current folder. Choose **Choose file** to use the standard Windows file picker instead. If you close that window without selecting a file, you return to the list.
+
+This direct workflow also creates two YAML files alongside the final document:
 
 ```text
 shooters-summary-<match-name>.yaml
 diplomas-data-<match-name>.yaml
 ```
 
-Spaces and invalid Windows filename characters in the match name are replaced with hyphens or underscores. Override either output explicitly:
+They are useful for checking who was included and why. Keep them with the match records.
 
-```powershell
-practiscore-diplomas parse -i "match-export.pcs" `
-  -c "competition.yaml" `
-  -s "results\summary.yaml" `
-  -d "results\diplomas.yaml"
+## When To Use Each Menu Option
+
+| Menu option | Use it when |
+| --- | --- |
+| Render diplomas from a PractiScore file | The normal choice. It parses the match, saves review data, and creates the final document in one operation. |
+| Parse a PractiScore file into YAML | You want to inspect or manually adjust the selected diplomas before rendering. |
+| Render diplomas from diploma-data YAML | You already have reviewed `diplomas-data-*.yaml` and want to create the document again, perhaps with a different template. |
+
+For manual adjustments, first choose **Parse a PractiScore file into YAML**. Open `diplomas-data-<match-name>.yaml` in a text editor, make careful changes, then choose **Render diplomas from diploma-data YAML**. This is useful for correcting a displayed name, removing a specific diploma, or changing text before printing.
+
+## Choosing A Configuration
+
+The `configs` folder contains example award rules:
+
+| File | Intended use |
+| --- | --- |
+| `gpa_t1_config.yaml` | GPA Tier 1 matches. |
+| `idpa_t1_config.yaml` | IDPA Tier 1 matches. |
+| `idpa_t2_config.yaml` | IDPA Tier 2 matches. |
+
+Start with the configuration closest to your match. Make a copy before changing it so the original example remains available.
+
+The configuration controls award series, such as division winners, category winners, fastest competitor, and most accurate competitor. It also decides who is eligible. By default, the supplied configurations exclude DQ and DNF competitors. A failed Chrono check is treated as DNF unless the configuration changes that setting.
+
+### Common Configuration Changes
+
+You may need to edit the configuration if your match uses different divisions, categories, award counts, or wording. The main concepts are:
+
+| Setting | Meaning |
+| --- | --- |
+| `series` | The award series to create. Each named entry becomes a separate ranking. |
+| `type` | `best_shooter`, `most_accurate`, or `fastest`. |
+| `group_by` | Split the ranking by `division`, `class`, or `category`. |
+| `min_competitors` | Number of competitors required for each additional diploma. `[1, 6, 11]` gives 1 diploma for 1-5 people, 2 for 6-10, and 3 for 11 or more. |
+| `filters` | Include or exclude divisions, categories, or classes. Patterns are regular expressions. |
+| `text` | The lines printed on the diploma. |
+
+If a configuration error appears, check quotation marks, indentation, and the spelling of division/category names. YAML indentation matters: use spaces, not tabs.
+
+## Configuration Reference
+
+Configuration files use YAML. Start by copying the closest example from `configs`, then edit the copy in a text editor. Keep the indentation consistent: use spaces, never the Tab key.
+
+The main parts of a configuration are:
+
+```yaml
+exclude_shooters:
+  surnames: []
+  ids: []
+mark_chrono_failure_as_dnf: true
+maps: {}
+series: {}
 ```
 
-The shooter summary is keyed by PractiScore `sh_uid`. It contains the visible `shooter_id`, name, division, class, categories, raw time, penalty data, points down, steel misses, total time, DNF, and DQ status. Deleted shooters, shooters without current score rows, and shooters excluded by configuration are not selected. Missing stages and failed Chrono checks can mark a shooter DNF.
+### Award Series
 
-## Two Workflows
-
-There are two ways to use the tool:
-
-1. `parse` → `render`: parse the match first, review or manually edit the generated `diplomas-data-<match-name>.yaml`, then render that file. Use this workflow when you need to correct a name, adjust a displayed value, remove a diploma, or make another deliberate change before creating the DOCX.
-2. Direct `render`: provide the match export, configuration, and DOCX template to `render`. The tool parses the match, saves both intermediate YAML files, and creates the DOCX in one step. Use this workflow when you want the convenience of one command but still want the generated data available for review.
-
-The two-step workflow is also useful when the same diploma data needs to be rendered again with a different template.
-
-## Configuration
-
-The top-level configuration contains `maps` and a keyed `series` mapping. A minimal series looks like this:
+Each entry under `series` describes one kind of diploma. The entry name is only an internal label, so choose a short, meaningful name. This example creates division awards:
 
 ```yaml
 series:
@@ -72,77 +113,189 @@ series:
     type: best_shooter
     group_by: [division]
     min_competitors: [1, 6, 11]
-    exclude_dq: true
-    exclude_dnf: true
-    ineligible_penalties: []
     text:
       first_line: "{{ division }} DIVISION"
-      second_line: "{{ place }}"
+      second_line: "{{ place }} PLACE"
 ```
 
-Supported series types are `best_shooter`, `most_accurate`, and `fastest`. `group_by` can use `division`, `class`, and `category`. A threshold list counts awards cumulatively: `[1, 6, 11]` produces one award for 1-5 eligible competitors, two for 6-10, and three for 11 or more. A threshold of `1` prevents an empty group from producing an award.
+| Setting | What it controls |
+| --- | --- |
+| `type` | Ranking method: `best_shooter` selects the best overall result, `most_accurate` selects the lowest points-down result, and `fastest` selects the lowest raw time. |
+| `group_by` | Creates separate rankings for each listed value: `division`, `class`, and/or `category`. Leave it out for one ranking covering everyone. |
+| `min_competitors` | Award thresholds. `[1, 6, 11]` gives one diploma for 1-5 eligible people, two for 6-10, and three from 11 onward. `[5]` gives no diploma below 5 people and one from 5 onward. |
+| `exclude_dq` | When `true`, DQ competitors cannot receive this award. The default is `true`. |
+| `exclude_dnf` | When `true`, DNF competitors cannot receive this award. The default is `true`. |
+| `ineligible_penalties` | A list of penalty names that make a competitor ineligible for this one series. Use the penalty name exactly as it appears in the export. |
 
-Filters use regular expressions. `include` limits values; `exclude` removes matching values. If a filter or one of its include/exclude lists is omitted, it means include everything or exclude nothing. When `include` is present, an `exclude` for the same dimension is unnecessary.
+Every series needs `type`, `text.first_line`, and `text.second_line`. `group_by`, filters, penalty rules, and the third and fourth text line are optional.
+
+### Filters
+
+Filters limit a series to selected divisions, categories, or classes. They use regular expressions. A pattern is matched against the complete PractiScore value, so use `.*` when the registration text continues after the code.
 
 ```yaml
 filters:
   divisions:
-    include: ["CCP|CDP|ESP|SSP"]
+    include: ["CPI.*", "CPO.*"]
   categories:
-    exclude: ["Lady"]
+    exclude: ["Lady.*"]
 ```
 
-Top-level `exclude_shooters.surnames` and `exclude_shooters.ids` accept regex lists. `mark_chrono_failure_as_dnf` defaults to `true`; set it to `false` only when Chrono failures should not affect eligibility.
+The example includes divisions whose registration name begins with `CPI` or `CPO`, while excluding the Lady category. The available filter groups are `divisions`, `categories`, and `classes`.
 
-Maps convert export values into display values. Text maps use regex keys and place maps use integer keys:
+| Form | Meaning |
+| --- | --- |
+| Omit `filters` or a filter group | Include all values. |
+| `include` | Include only values matching at least one listed pattern. |
+| `exclude` | Exclude values matching a listed pattern. Exclusion takes priority over inclusion. |
+| A simple list, such as `divisions: ["CPI.*"]` | Short form of `include`. |
+
+### Maps And Diploma Line Text
+
+Maps turn a value from PractiScore into the shorter wording printed on a diploma. They are especially useful when a division or category contains registration details that should not appear in the title.
 
 ```yaml
 maps:
   division_code:
-    "CO": CO
+    "CPI.*": CPI
+    "CPO.*": CPO
   division_place:
     1: CHAMPION
+    2: 2nd PLACE
+    3: 3rd PLACE
 ```
 
-Text supports `division`, `category`, `class`, `place`, `type`, `shooter.<field>`, and map calls such as `{{ division_code(division) }}`. Missing mappings are configuration errors.
+The program checks map entries from top to bottom and uses the first matching entry. Put more specific patterns before general ones. Quote text patterns such as `"CPI.*"`; numeric keys, such as places, do not need quotes.
 
-## DOCX or ODT Template
+The `text` section defines up to four lines for each diploma. The first two are required; the third and fourth are optional.
 
-Render the generated diploma data with a DOCX or ODT template:
+```yaml
+text:
+  first_line: "{{ division_code(division) }} DIVISION"
+  second_line: "{{ division_place(place) }}"
+  third_line: "{{ shooter.raw_time }} s"
+  fourth_line: "{{ shooter.points_down }} PD"
+```
+
+Use `{{ field }}` to insert a value, and `{{ map_name(field) }}` to use a map. The following values can be used in diploma lines:
+
+| Value | Meaning |
+| --- | --- |
+| `division`, `category`, `class` | The value that defines the current award group. |
+| `place` | Place in the award ranking. |
+| `type` | Award type: `best_shooter`, `most_accurate`, or `fastest`. |
+| `shooter.shooter_id` | Visible GPA or IDPA competitor number. |
+| `shooter.first_name`, `shooter.last_name` | Competitor name. |
+| `shooter.division`, `shooter.categories`, `shooter.class` | Values recorded for the competitor in PractiScore. |
+| `shooter.raw_time`, `shooter.points_down`, `shooter.steel_misses`, `shooter.penalty_seconds`, `shooter.total_time` | Result values. |
+| `shooter.dnf`, `shooter.dq`, `shooter.shooter_uid` | Competitor status and internal identifier. |
+
+These YAML text lines provide `first_line` through `fourth_line` to the document template. The placeholders in the DOCX or ODT template are described in the next section; map calls are used in the configuration, not directly in the document template.
+
+### Excluding Specific Shooters And Chrono Failures
+
+Use `exclude_shooters` to remove non-competitors, test records, or a PAR-time record from every award series. `surnames` and `ids` are regular-expression lists; either list can be empty.
+
+```yaml
+exclude_shooters:
+  surnames: ["(?i)^par$"]
+  ids: []
+```
+
+`mark_chrono_failure_as_dnf: true` is the default. When a match has a Chrono stage, a competitor whose gear check is not marked Pass is treated as DNF. Change it to `false` only when the match rules require a different result.
+
+## Prepare A Diploma Template
+
+Use a DOCX or ODT file as the template. Place placeholders wherever the changing text should appear. For example:
+
+```text
+{{ first_line }}
+{{ second_line }}
+{{ shooter.first_name }} {{ shooter.last_name }}
+```
+
+The program makes one copy of the template for every diploma. It keeps the document formatting, including font, size, alignment, and tables. The release includes `example-diploma-template.docx`, a small working example.
+
+### Template Fields
+
+| Field | Meaning |
+| --- | --- |
+| `first_line` | First line defined by the award configuration. |
+| `second_line` | Second line defined by the award configuration. |
+| `third_line` | Optional third line. Empty when the series does not define it. |
+| `fourth_line` | Optional fourth line. Empty when the series does not define it. |
+| `place` | Competitor's place in that award ranking. |
+| `division` | Division used for the award. |
+| `category` | Category used for the award. |
+| `class` | Class used for the award. |
+| `metric_value` | Ranking value, for example time or points down. |
+| `shooter.shooter_id` | Visible GPA or IDPA competitor number. |
+| `shooter.first_name` | Competitor's first name. |
+| `shooter.last_name` | Competitor's last name. |
+| `shooter.division` | Division recorded in PractiScore. |
+| `shooter.categories` | Categories, shown as comma-separated text. |
+| `shooter.class` | Class recorded in PractiScore. |
+| `shooter.raw_time` | Total raw time before penalties. |
+| `shooter.points_down` | Total points-down count. |
+| `shooter.steel_misses` | Total missed steel targets. |
+| `shooter.penalty_seconds` | Time added for penalties. |
+| `shooter.total_time` | Raw time plus penalties. |
+| `shooter.dnf` | `True` when the competitor is DNF. |
+| `shooter.dq` | `True` when the competitor is DQ. |
+| `shooter.shooter_uid` | Internal PractiScore identifier. Usually not needed on a diploma. |
+
+Use the exact spelling and braces shown above. Unknown fields stop rendering so that a typo does not silently produce an incorrect diploma.
+
+## Output Formats
+
+| Output | Notes |
+| --- | --- |
+| DOCX | Best choice when the template is DOCX and you may still edit the document. |
+| ODT | Works directly when using an ODT template. |
+| PDF | Requires LibreOffice installed with `soffice` available on the Windows `PATH`. |
+
+Converting between DOCX and ODT also requires LibreOffice. If you use the interactive mode, the file extension selected in the save window determines the output format.
+
+## Command-Line Use
+
+Interactive mode is recommended. The commands below are useful when repeating the same workflow or when automating a known process.
+
+Render directly from a match:
 
 ```powershell
 practiscore-diplomas render `
-  -d "diplomas-data-Plata-o-Plomo-2025.yaml" `
+  -i "match-export.psc" `
+  -c "configs\gpa_t1_config.yaml" `
   -t "diploma-template.docx" `
   --output-docx "diplomas.docx"
 ```
 
-The template is cloned once for each diploma record, preserving configured series order and ranking order. The result has one diploma page per record. Placeholders in paragraphs and tables use `{{ field }}` syntax. Use `--output-odt` for an ODT document or `--output-pdf` for a PDF. The path after each output option is optional, so `--output-odt` creates `diplomas.odt`; provide a path to override it. `-o` is an alias for `--output-docx`; the three output options are mutually exclusive. PDF output requires LibreOffice with `soffice` available on `PATH`.
+Create review data only:
 
-An ODT template rendered to ODT output is handled directly by the program and does not require LibreOffice:
+```powershell
+practiscore-diplomas parse `
+  -i "match-export.psc" `
+  -c "configs\gpa_t1_config.yaml"
+```
+
+Render reviewed data:
 
 ```powershell
 practiscore-diplomas render `
-  -d "diplomas-data-MATCH.yaml" `
-  -t "diploma-template.odt" `
-  --output-odt
+  -d "diplomas-data-Match-Name.yaml" `
+  -t "diploma-template.docx" `
+  --output-docx "diplomas.docx"
 ```
 
-LibreOffice is needed only when converting between DOCX and ODT, or when creating PDF output.
+Use `--output-odt` or `--output-pdf` instead of `--output-docx` when needed. The output path after these options is optional; without it, the program creates a sensible default filename.
 
-Alternatively, parse and render directly from a match export. The configuration is required in this mode. This command also writes `shooters-summary-<match-name>.yaml` and `diplomas-data-<match-name>.yaml` next to the DOCX so you can review or edit the intermediate data:
+## Troubleshooting
 
-```powershell
-practiscore-diplomas render `
-  -i "match-export.pcs" `
-  -c "configs\gpa_t1_config.yaml" `
-  -t "diploma-template.docx"
-```
-
-The default output is `diplomas.docx` when using `-d` and `diplomas-<match-name>.docx` when using `-i`. Use `-o` to override it.
-
-Available diploma fields include `first_line`, `second_line`, optional `third_line` and `fourth_line`, `place`, `division`, `category`, `class`, and `metric_value`. Shooter fields use paths such as `{{ shooter.first_name }}`, `{{ shooter.last_name }}`, `{{ shooter.raw_time }}`, and `{{ shooter.points_down }}`. Missing optional third and fourth lines render empty; unknown or missing required fields fail clearly.
-
-## Example Template
-
-The folder contains `example-diploma-template.docx`, a minimal template containing only the diploma lines and shooter name. ODT templates use the same `{{ field }}` placeholders in text paragraphs. Use the example template to verify the workflow before preparing your own template.
+| Problem | What to check |
+| --- | --- |
+| A match file is not listed | Confirm that it is a `.psc` export, or use **Choose file**. |
+| No diploma was created for a division or category | Check the configuration's filters, `min_competitors`, and DNF/DQ rules. |
+| A competitor is unexpectedly DNF | Check whether every stage has a score and whether Chrono was passed. |
+| A placeholder causes an error | Check its spelling against the Template Fields table. |
+| PDF output fails | Install LibreOffice and ensure `soffice` is available on `PATH`. |
+| Text is not positioned correctly | Adjust the paragraph or table formatting in the template, then render again. |

@@ -104,7 +104,7 @@ def test_cli_without_arguments_shows_complete_help(monkeypatch, capsys):
     assert "--template PATH" in output
     assert "Examples:" in output
     assert "render -d diplomas-data-MATCH.yaml" in output
-    assert "render -i MATCH.pcs -c configs" in output
+    assert "render -i MATCH.psc -c configs" in output
 
 
 def test_polish_help_contains_diacritics(monkeypatch, capsys):
@@ -121,7 +121,7 @@ def test_polish_help_contains_diacritics(monkeypatch, capsys):
 def test_interactive_arguments_for_rendering_pcs(tmp_path: Path, monkeypatch):
     (tmp_path / "configs").mkdir()
     (tmp_path / "configs" / "gpa.yaml").write_text("series: {}", encoding="utf-8")
-    (tmp_path / "match.pcs").write_bytes(b"")
+    (tmp_path / "match.psc").write_bytes(b"")
     (tmp_path / "template.odt").write_bytes(b"")
     monkeypatch.chdir(tmp_path)
     selections = iter([0, 0, 0, 0])
@@ -130,7 +130,7 @@ def test_interactive_arguments_for_rendering_pcs(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(builtins, "input", lambda prompt="": "")
 
     assert cli._interactive_arguments("en") == [
-        "--language", "en", "render", "-i", "match.pcs", "-c", "configs\\gpa.yaml",
+        "--language", "en", "render", "-i", "match.psc", "-c", "configs\\gpa.yaml",
         "-t", "template.odt", "--output-odt", "diplomas-match.odt",
     ]
 
@@ -150,10 +150,10 @@ def test_interactive_arguments_for_rendering_yaml_skips_config(tmp_path: Path, m
 
 
 def test_interactive_file_dialog_cancel_returns_to_list(tmp_path: Path, monkeypatch):
-    (tmp_path / "match.pcs").write_bytes(b"")
+    (tmp_path / "match.psc").write_bytes(b"")
     monkeypatch.chdir(tmp_path)
     selections = iter([1, 0])
     monkeypatch.setattr(cli, "_select_option", lambda prompt, options: next(selections))
     monkeypatch.setattr(cli, "_system_file_dialog", lambda prompt, directory, patterns: None)
 
-    assert cli._interactive_path("Choose", Path("."), ("*.pcs",), cli._MESSAGES["en"]) == Path("match.pcs")
+    assert cli._interactive_path("Choose", Path("."), ("*.psc",), cli._MESSAGES["en"]) == Path("match.psc")

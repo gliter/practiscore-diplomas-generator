@@ -22,7 +22,7 @@ _MESSAGES = {
         "description": "Parse PractiScore exports and generate diploma data.",
         "language": "CLI help language (default: system locale)",
         "parse_help": "Create shooter summary and diploma data files.",
-        "parse_input": "PractiScore .pcs/.psc archive or unpacked export directory",
+        "parse_input": "PractiScore .psc archive or unpacked export directory",
         "config": "Configuration YAML",
         "summary": "Shooter summary YAML (default: shooters-summary-<match-name>.yaml)",
         "diplomas": "Diploma data YAML (default: diplomas-data-<match-name>.yaml)",
@@ -46,14 +46,14 @@ _MESSAGES = {
         "interactive_save_unavailable": "The save dialog is unavailable; using the suggested output path.",
         "interactive_output": "Choose output file",
         "render_config": "Configuration YAML (required with --input)",
-        "examples": "Examples:\n  practiscore-diplomas parse -i MATCH.pcs -c configs\\gpa_t1_config.yaml\n  practiscore-diplomas render -d diplomas-data-MATCH.yaml -t diploma-template.docx\n  practiscore-diplomas render -i MATCH.pcs -c configs\\gpa_t1_config.yaml -t diploma-template.docx",
+        "examples": "Examples:\n  practiscore-diplomas parse -i MATCH.psc -c configs\\gpa_t1_config.yaml\n  practiscore-diplomas render -d diplomas-data-MATCH.yaml -t diploma-template.docx\n  practiscore-diplomas render -i MATCH.psc -c configs\\gpa_t1_config.yaml -t diploma-template.docx",
         "command_options": "Command options:\n  parse -i PATH -c PATH [-s PATH] [-d PATH]\n    -i, --input PATH      PractiScore archive or unpacked export directory (required)\n    -c, --config PATH     Configuration YAML (required)\n    -s, --summary-output PATH Shooter summary output\n    -d, --diplomas-data PATH Diploma data output\n  render (-d PATH | -i PATH) -t PATH [output option]\n    -d, --diplomas-data PATH Diploma data input\n    -i, --input PATH      Match input; writes summary and diploma data, then renders\n    -c, --config PATH     Configuration YAML (required with -i)\n    -t, --template PATH   DOCX or ODT diploma template (required)\n    -o, --output-docx PATH Final DOCX output (default: diplomas.docx or diplomas-<match-name>.docx)\n        --output-odt PATH Final ODT output\n        --output-pdf PATH Final PDF output (requires LibreOffice)",
     },
     "pl": {
         "description": "Parsuj eksporty PractiScore i generuj dane dyplomów.",
         "language": "Język pomocy CLI (domyślnie: ustawienia systemu)",
         "parse_help": "Utwórz podsumowanie strzelców i dane dyplomów.",
-        "parse_input": "Archiwum PractiScore .pcs/.psc lub rozpakowany katalog eksportu",
+        "parse_input": "Archiwum PractiScore .psc lub rozpakowany katalog eksportu",
         "config": "Plik YAML z konfiguracją",
         "summary": "Podsumowanie strzelców YAML (domyślnie: shooters-summary-<nazwa-meczu>.yaml)",
         "diplomas": "Dane dyplomów YAML (domyślnie: diplomas-data-<nazwa-meczu>.yaml)",
@@ -77,7 +77,7 @@ _MESSAGES = {
         "interactive_save_unavailable": "Okno zapisu jest niedostępne; zostanie użyta sugerowana ścieżka.",
         "interactive_output": "Wybierz plik wynikowy",
         "render_config": "Plik YAML z konfiguracją (wymagany z --input)",
-        "examples": "Przykłady:\n  practiscore-diplomas parse -i MECZ.pcs -c configs\\gpa_t1_config.yaml\n  practiscore-diplomas render -d diplomas-data-MECZ.yaml -t szablon-dyplomu.docx\n  practiscore-diplomas render -i MECZ.pcs -c configs\\gpa_t1_config.yaml -t szablon-dyplomu.docx",
+        "examples": "Przykłady:\n  practiscore-diplomas parse -i MECZ.psc -c configs\\gpa_t1_config.yaml\n  practiscore-diplomas render -d diplomas-data-MECZ.yaml -t szablon-dyplomu.docx\n  practiscore-diplomas render -i MECZ.psc -c configs\\gpa_t1_config.yaml -t szablon-dyplomu.docx",
         "command_options": "Opcje poleceń:\n  parse -i PATH -c PATH [-s PATH] [-d PATH]\n    -i, --input PATH      Archiwum PractiScore lub rozpakowany katalog eksportu (wymagany)\n    -c, --config PATH     Plik YAML z konfiguracją (wymagany)\n    -s, --summary-output PATH Plik wynikowy podsumowania strzelców\n    -d, --diplomas-data PATH Plik wynikowy danych dyplomów\n  render (-d PATH | -i PATH) -t PATH [opcja wyjścia]\n    -d, --diplomas-data PATH Dane dyplomów jako wejście\n    -i, --input PATH      Wejście meczu; zapisuje podsumowanie i dane dyplomów, potem renderuje\n    -c, --config PATH     Plik YAML z konfiguracją (wymagany z -i)\n    -t, --template PATH   Szablon dyplomu DOCX lub ODT (wymagany)\n    -o, --output-docx PATH Docelowy plik DOCX (domyślnie: diplomas.docx lub diplomas-<nazwa-meczu>.docx)\n        --output-odt PATH Docelowy plik ODT\n        --output-pdf PATH Docelowy plik PDF (wymaga LibreOffice)",
     },
 }
@@ -265,7 +265,7 @@ def _interactive_arguments(language: str) -> list[str]:
     if mode == 1:
         source = _interactive_path(messages["interactive_yaml"], Path("."), ("*.yaml", "*.yml"), messages)
     else:
-        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.pcs", "*.psc"), messages)
+        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.psc",), messages)
     if mode == 2:
         return ["--language", language, "parse", "-i", str(source), "-c", str(config)]
     template = _interactive_path(messages["interactive_template"], Path("."), ("*.docx", "*.odt"), messages)
