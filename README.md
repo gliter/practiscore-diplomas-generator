@@ -104,6 +104,23 @@ uv run pytest
 
 The tests use synthetic, anonymized match data. The supplied example exports are useful for local integration checks, but real names, emails, and identifiers must not be copied into fixtures or documentation.
 
+## Build Windows Distribution
+
+Build the Windows executable and ZIP package from PowerShell on Windows. Install `uv`, sync the development dependencies, then run the build script with a semantic version:
+
+```powershell
+uv sync --dev
+pwsh -File .\scripts\build_windows.ps1 -Version 0.1.1
+```
+
+The script uses PyInstaller and creates:
+
+```text
+dist\practiscore-diplomas-generator-0.1.1-windows-x64.zip
+```
+
+The ZIP contains `practiscore-diplomas.exe`, the example configurations, both user guides, the example DOCX template when present, and the MIT license. Temporary PyInstaller files are placed under `build\` and are ignored by Git. The GitHub Actions release workflow runs the same build automatically after a push to `main`.
+
 ## Project Direction
 
 The final workflow will use the parsed match, configuration, and DOCX template to produce diploma documents. The YAML shooter summary and diploma data are intermediate products, not final user-facing output.
@@ -117,3 +134,9 @@ exclude_shooters:
 ```
 
 Chronograph stages are detected from `stage_scoretype: Chrono`. By default, a shooter whose Chrono result does not have `gear_check: Pass` is marked DNF. This can be disabled with `mark_chrono_failure_as_dnf: false`.
+
+## Interactive Mode
+
+Run `practiscore-diplomas` without arguments in an interactive terminal to open the workflow menu. Use the up and down arrows and Enter to choose whether to render from a PractiScore export, render from diploma-data YAML, or parse a PractiScore export into YAML files.
+
+The interactive pickers list configurations from `configs`, match/YAML files from the current directory, and DOCX/ODT templates from the current directory. Each picker has a localized `Choose file` / `Wybierz plik` option that opens the system file dialog. Cancelling that dialog returns to the list. Rendering uses a system save dialog with a suggested output filename and displays a success message after completion.

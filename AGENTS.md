@@ -22,7 +22,7 @@ The project targets Python 3.10 or newer. Keep dependencies declared in `pyproje
 - `src/practiscore_diplomas/render.py`: DOCX/ODT template expansion, format conversion, and multi-page document assembly.
 - `src/practiscore_diplomas/cli.py`: localized `parse`/`render` command-line interface and YAML serialization.
 - `scripts/build_windows.ps1`: PyInstaller executable and release ZIP builder.
-- `.github/workflows/release.yml`: Windows build and GitHub Release workflow for merged pull requests targeting `main`.
+- `.github/workflows/release.yml`: Windows build and GitHub Release workflow for pushes to `main`.
 - `tests/`: anonymized unit and CLI tests.
 - `diplom generator.md`: product specification and PractiScore field notes.
 

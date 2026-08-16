@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import sys
+from typing import Mapping
 
 import yaml
 
@@ -32,6 +33,18 @@ _MESSAGES = {
         "output_docx": "Final DOCX output, path optional (default for DOCX templates)",
         "output_odt": "Final ODT output, path optional",
         "output_pdf": "Final PDF output, path optional (requires LibreOffice)",
+        "interactive_mode": "What would you like to do?",
+        "interactive_render_pcs": "Render diplomas from a PractiScore file",
+        "interactive_render_yaml": "Render diplomas from diploma-data YAML",
+        "interactive_parse_pcs": "Parse a PractiScore file into YAML",
+        "interactive_config": "Choose a configuration",
+        "interactive_pcs": "Choose a PractiScore file",
+        "interactive_yaml": "Choose diploma-data YAML",
+        "interactive_template": "Choose a DOCX or ODT template",
+        "interactive_file_dialog": "Choose file",
+        "interactive_success": "Operation completed successfully.",
+        "interactive_save_unavailable": "The save dialog is unavailable; using the suggested output path.",
+        "interactive_output": "Choose output file",
         "render_config": "Configuration YAML (required with --input)",
         "examples": "Examples:\n  practiscore-diplomas parse -i MATCH.pcs -c configs\\gpa_t1_config.yaml\n  practiscore-diplomas render -d diplomas-data-MATCH.yaml -t diploma-template.docx\n  practiscore-diplomas render -i MATCH.pcs -c configs\\gpa_t1_config.yaml -t diploma-template.docx",
         "command_options": "Command options:\n  parse -i PATH -c PATH [-s PATH] [-d PATH]\n    -i, --input PATH      PractiScore archive or unpacked export directory (required)\n    -c, --config PATH     Configuration YAML (required)\n    -s, --summary-output PATH Shooter summary output\n    -d, --diplomas-data PATH Diploma data output\n  render (-d PATH | -i PATH) -t PATH [output option]\n    -d, --diplomas-data PATH Diploma data input\n    -i, --input PATH      Match input; writes summary and diploma data, then renders\n    -c, --config PATH     Configuration YAML (required with -i)\n    -t, --template PATH   DOCX or ODT diploma template (required)\n    -o, --output-docx PATH Final DOCX output (default: diplomas.docx or diplomas-<match-name>.docx)\n        --output-odt PATH Final ODT output\n        --output-pdf PATH Final PDF output (requires LibreOffice)",
@@ -51,6 +64,18 @@ _MESSAGES = {
         "output_docx": "Docelowy plik DOCX, ścieżka opcjonalna (domyślnie dla szablonu DOCX)",
         "output_odt": "Docelowy plik ODT, ścieżka opcjonalna",
         "output_pdf": "Docelowy plik PDF, ścieżka opcjonalna (wymaga LibreOffice)",
+        "interactive_mode": "Co chcesz zrobić?",
+        "interactive_render_pcs": "Wygenerować dyplomy z pliku PractiScore",
+        "interactive_render_yaml": "Wygenerować dyplomy z pliku YAML z danymi dyplomów",
+        "interactive_parse_pcs": "Sparsować plik PractiScore do plików YAML",
+        "interactive_config": "Wybierz konfigurację",
+        "interactive_pcs": "Wybierz plik PractiScore",
+        "interactive_yaml": "Wybierz plik YAML z danymi dyplomów",
+        "interactive_template": "Wybierz szablon DOCX lub ODT",
+        "interactive_file_dialog": "Wybierz plik",
+        "interactive_success": "Operacja zakończona pomyślnie.",
+        "interactive_save_unavailable": "Okno zapisu jest niedostępne; zostanie użyta sugerowana ścieżka.",
+        "interactive_output": "Wybierz plik wynikowy",
         "render_config": "Plik YAML z konfiguracją (wymagany z --input)",
         "examples": "Przykłady:\n  practiscore-diplomas parse -i MECZ.pcs -c configs\\gpa_t1_config.yaml\n  practiscore-diplomas render -d diplomas-data-MECZ.yaml -t szablon-dyplomu.docx\n  practiscore-diplomas render -i MECZ.pcs -c configs\\gpa_t1_config.yaml -t szablon-dyplomu.docx",
         "command_options": "Opcje poleceń:\n  parse -i PATH -c PATH [-s PATH] [-d PATH]\n    -i, --input PATH      Archiwum PractiScore lub rozpakowany katalog eksportu (wymagany)\n    -c, --config PATH     Plik YAML z konfiguracją (wymagany)\n    -s, --summary-output PATH Plik wynikowy podsumowania strzelców\n    -d, --diplomas-data PATH Plik wynikowy danych dyplomów\n  render (-d PATH | -i PATH) -t PATH [opcja wyjścia]\n    -d, --diplomas-data PATH Dane dyplomów jako wejście\n    -i, --input PATH      Wejście meczu; zapisuje podsumowanie i dane dyplomów, potem renderuje\n    -c, --config PATH     Plik YAML z konfiguracją (wymagany z -i)\n    -t, --template PATH   Szablon dyplomu DOCX lub ODT (wymagany)\n    -o, --output-docx PATH Docelowy plik DOCX (domyślnie: diplomas.docx lub diplomas-<nazwa-meczu>.docx)\n        --output-odt PATH Docelowy plik ODT\n        --output-pdf PATH Docelowy plik PDF (wymaga LibreOffice)",
@@ -115,6 +140,150 @@ def _language_from_argv(argv: list[str]) -> str:
     return _system_language()
 
 
+def _interactive_terminal() -> bool:
+    return bool(sys.stdin.isatty() and sys.stdout.isatty())
+
+
+def _select_option(prompt: str, options: list[str]) -> int:
+    if not options:
+        raise ValueError("Interactive selection has no options")
+    try:
+        import msvcrt
+    except ImportError:
+        print(prompt)
+        for index, option in enumerate(options, start=1):
+            print(f"  {index}. {option}")
+        while True:
+            try:
+                selected = int(input("Choice: ")) - 1
+            except ValueError:
+                continue
+            if 0 <= selected < len(options):
+                return selected
+
+    selected = 0
+
+    def draw() -> None:
+        print(prompt)
+        for index, option in enumerate(options):
+            marker = "\x1b[7m" if index == selected else ""
+            reset = "\x1b[0m" if index == selected else ""
+            print(f"  {marker}{option}{reset}")
+
+    draw()
+    while True:
+        key = msvcrt.getwch()
+        if key in {"\r", "\n"}:
+            print()
+            return selected
+        if key in {"\x00", "\xe0"}:
+            key = msvcrt.getwch()
+            if key == "H":
+                selected = (selected - 1) % len(options)
+            elif key == "P":
+                selected = (selected + 1) % len(options)
+            else:
+                continue
+            sys.stdout.write(f"\x1b[{len(options) + 1}A")
+            draw()
+
+
+def _system_file_dialog(prompt: str, directory: Path, patterns: tuple[str, ...]) -> Path | None:
+    try:
+        from tkinter import Tk, filedialog
+        root = Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        filetypes = [("Files", " ".join(patterns)), ("All files", "*.*")]
+        selected = filedialog.askopenfilename(title=prompt, initialdir=str(directory.resolve()), filetypes=filetypes)
+        root.destroy()
+        return Path(selected) if selected else None
+    except Exception:
+        return None
+
+
+def _interactive_path(prompt: str, directory: Path, patterns: tuple[str, ...], messages: Mapping[str, str]) -> Path:
+    paths = sorted(
+        path for pattern in patterns for path in directory.glob(pattern) if path.is_file()
+    ) if directory.is_dir() else []
+    options = [str(path) for path in paths]
+    options.append(messages["interactive_file_dialog"])
+    while True:
+        selected = _select_option(prompt, options)
+        if selected < len(paths):
+            return paths[selected]
+        path = _system_file_dialog(prompt, directory, patterns)
+        if path is not None:
+            return path
+
+
+def _system_save_dialog(prompt: str, suggested: Path) -> Path | None:
+    try:
+        from tkinter import Tk, filedialog
+        root = Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        filetypes = [("DOCX files", "*.docx"), ("ODT files", "*.odt"), ("PDF files", "*.pdf"), ("All files", "*.*")]
+        selected = filedialog.asksaveasfilename(
+            title=prompt,
+            initialdir=str(suggested.parent.resolve()),
+            initialfile=suggested.name,
+            defaultextension=suggested.suffix,
+            filetypes=filetypes,
+        )
+        root.destroy()
+        return Path(selected) if selected else None
+    except Exception:
+        return None
+
+
+def _interactive_output_path(template: Path, source: Path, messages: Mapping[str, str]) -> Path:
+    extension = template.suffix.lower() if template.suffix.lower() in {".docx", ".odt"} else ".docx"
+    stem = source.stem
+    if stem == "diplomas-data":
+        stem = "match"
+    elif stem.startswith("diplomas-data-"):
+        stem = stem.removeprefix("diplomas-data-") or "match"
+    suggested = _match_document_path("diplomas", stem).with_suffix(extension)
+    selected = _system_save_dialog(messages["interactive_output"], suggested)
+    if selected is not None:
+        return selected
+    print(messages["interactive_save_unavailable"])
+    return suggested
+
+
+def _interactive_arguments(language: str) -> list[str]:
+    messages = _MESSAGES[language]
+    mode = _select_option(messages["interactive_mode"], [
+        messages["interactive_render_pcs"],
+        messages["interactive_render_yaml"],
+        messages["interactive_parse_pcs"],
+    ])
+    config = None
+    if mode != 1:
+        config = _interactive_path(messages["interactive_config"], Path("configs"), ("*.yaml", "*.yml"), messages)
+    if mode == 1:
+        source = _interactive_path(messages["interactive_yaml"], Path("."), ("*.yaml", "*.yml"), messages)
+    else:
+        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.pcs", "*.psc"), messages)
+    if mode == 2:
+        return ["--language", language, "parse", "-i", str(source), "-c", str(config)]
+    template = _interactive_path(messages["interactive_template"], Path("."), ("*.docx", "*.odt"), messages)
+    output = _interactive_output_path(template, source, messages)
+    output_option = {
+        ".docx": "--output-docx",
+        ".odt": "--output-odt",
+        ".pdf": "--output-pdf",
+    }.get(output.suffix.lower(), "--output-docx")
+    command = ["--language", language, "render"]
+    if mode == 1:
+        command.extend(["-d", str(source)])
+    else:
+        command.extend(["-i", str(source), "-c", str(config)])
+    command.extend(["-t", str(template), output_option, str(output)])
+    return command
+
+
 def _build_parser(language: str | None = None) -> argparse.ArgumentParser:
     language = language or _system_language()
     if language not in _MESSAGES:
@@ -147,9 +316,16 @@ def _build_parser(language: str | None = None) -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> int:
-    parser = _build_parser(_language_from_argv(sys.argv[1:]))
-    args = parser.parse_args()
+def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    language = _language_from_argv(argv)
+    parser = _build_parser(language)
+    if not argv and _interactive_terminal():
+        result = main(_interactive_arguments(language))
+        if result == 0:
+            print(_MESSAGES[language]["interactive_success"])
+        return result
+    args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
         return 0

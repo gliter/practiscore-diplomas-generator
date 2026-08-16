@@ -1,4 +1,5 @@
 import json
+import builtins
 import sys
 from pathlib import Path
 
@@ -115,3 +116,44 @@ def test_polish_help_contains_diacritics(monkeypatch, capsys):
     assert "dyplomów" in output
     assert "Język" in output
     assert "Przykłady:" in output
+
+
+def test_interactive_arguments_for_rendering_pcs(tmp_path: Path, monkeypatch):
+    (tmp_path / "configs").mkdir()
+    (tmp_path / "configs" / "gpa.yaml").write_text("series: {}", encoding="utf-8")
+    (tmp_path / "match.pcs").write_bytes(b"")
+    (tmp_path / "template.odt").write_bytes(b"")
+    monkeypatch.chdir(tmp_path)
+    selections = iter([0, 0, 0, 0])
+    monkeypatch.setattr(cli, "_select_option", lambda prompt, options: next(selections))
+    monkeypatch.setattr(cli, "_system_save_dialog", lambda prompt, suggested: None)
+    monkeypatch.setattr(builtins, "input", lambda prompt="": "")
+
+    assert cli._interactive_arguments("en") == [
+        "--language", "en", "render", "-i", "match.pcs", "-c", "configs\\gpa.yaml",
+        "-t", "template.odt", "--output-odt", "diplomas-match.odt",
+    ]
+
+
+def test_interactive_arguments_for_rendering_yaml_skips_config(tmp_path: Path, monkeypatch):
+    (tmp_path / "diplomas-data.yaml").write_text("diplomas: {}", encoding="utf-8")
+    (tmp_path / "template.docx").write_bytes(b"")
+    monkeypatch.chdir(tmp_path)
+    selections = iter([1, 0, 0])
+    monkeypatch.setattr(cli, "_select_option", lambda prompt, options: next(selections))
+    monkeypatch.setattr(cli, "_system_save_dialog", lambda prompt, suggested: Path("custom.docx"))
+
+    assert cli._interactive_arguments("en") == [
+        "--language", "en", "render", "-d", "diplomas-data.yaml",
+        "-t", "template.docx", "--output-docx", "custom.docx",
+    ]
+
+
+def test_interactive_file_dialog_cancel_returns_to_list(tmp_path: Path, monkeypatch):
+    (tmp_path / "match.pcs").write_bytes(b"")
+    monkeypatch.chdir(tmp_path)
+    selections = iter([1, 0])
+    monkeypatch.setattr(cli, "_select_option", lambda prompt, options: next(selections))
+    monkeypatch.setattr(cli, "_system_file_dialog", lambda prompt, directory, patterns: None)
+
+    assert cli._interactive_path("Choose", Path("."), ("*.pcs",), cli._MESSAGES["en"]) == Path("match.pcs")

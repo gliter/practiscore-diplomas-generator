@@ -6,6 +6,16 @@ This tool reads a PractiScore `.pcs` or `.psc` export, selects diploma recipient
 
 Run `practiscore-diplomas.exe` from PowerShell in the folder containing the executable. The executable does not require Python or `uv`. Keep the `configs` folder and the DOCX template next to it, or pass their full paths.
 
+## Interactive Mode
+
+Run the program without arguments to open an interactive menu. Use the up and down arrows and press Enter to choose one of these workflows:
+
+- render directly from a PractiScore `.pcs` or `.psc` export;
+- render from a diploma-data YAML file;
+- parse a PractiScore export into the shooter summary and diploma-data YAML files.
+
+The menu lists configurations from `configs`, match and YAML files from the current directory, and DOCX/ODT templates from the current directory. Each picker also includes a `Choose file` option to open the system file dialog. If the dialog is cancelled, the picker returns to the list. Rendering uses a system save dialog with a suggested output name. A success message is displayed after the operation finishes.
+
 ## Language
 
 Help follows the system locale. Polish systems use Polish help; other locales use English. Override it explicitly with `--language` either before or after the command:

@@ -6,6 +6,16 @@ Program odczytuje eksport PractiScore `.pcs` lub `.psc`, wybiera zdobywców dypl
 
 Uruchom `practiscore-diplomas.exe` w PowerShellu, będąc w folderze programu. Program nie wymaga zainstalowanego Pythona ani `uv`. Folder `configs` i szablon DOCX możesz trzymać obok programu albo podać do nich pełne ścieżki.
 
+## Tryb interaktywny
+
+Uruchom program bez argumentów, aby otworzyć menu interaktywne. Użyj strzałek góra/dół i zatwierdź wybór klawiszem Enter:
+
+- renderowanie bezpośrednio z eksportu PractiScore `.pcs` lub `.psc`;
+- renderowanie z pliku YAML z danymi dyplomów;
+- parsowanie eksportu PractiScore do podsumowania strzelców i pliku YAML z danymi dyplomów.
+
+Menu pokazuje konfiguracje z folderu `configs`, pliki meczów i YAML z bieżącego folderu oraz szablony DOCX/ODT z bieżącego folderu. Każdy wybór zawiera też opcję `Wybierz plik`, która otwiera systemowe okno wyboru pliku. Jeśli okno zostanie anulowane, program wraca do listy. Przy renderowaniu otwiera się systemowe okno zapisu z proponowaną nazwą pliku. Po zakończeniu operacji wyświetlany jest komunikat o sukcesie.
+
 ## Język
 
 Pomoc jest wybierana na podstawie ustawień systemu. Dla polskiego systemu używany jest język polski, a dla pozostałych angielski. Język można wymusić opcją `--language` przed lub po komendzie:
