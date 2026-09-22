@@ -22,7 +22,11 @@ try {
     Copy-Item -LiteralPath (Join-Path $repoRoot "dist\practiscore-diplomas.exe") -Destination $releaseRoot
     Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $releaseRoot
     Copy-Item -LiteralPath (Join-Path $repoRoot "docs") -Destination $releaseRoot -Recurse
+    Get-ChildItem -LiteralPath (Join-Path $releaseRoot "docs") -File -Recurse -Filter "*.bak" |
+        Remove-Item -Force
     Copy-Item -LiteralPath (Join-Path $repoRoot "configs") -Destination $releaseRoot -Recurse
+    Get-ChildItem -LiteralPath (Join-Path $releaseRoot "configs") -File -Recurse -Filter "*.bak" |
+        Remove-Item -Force
     if (Test-Path (Join-Path $repoRoot "example-diploma-template.docx")) {
         Copy-Item -LiteralPath (Join-Path $repoRoot "example-diploma-template.docx") -Destination $releaseRoot
     }

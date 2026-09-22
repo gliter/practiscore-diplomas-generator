@@ -103,6 +103,27 @@ def test_filter_values_support_include_and_exclude_regexes(tmp_path):
     assert [item["shooter"]["first_name"] for item in output] == ["A"]
 
 
+def test_category_grouping_uses_only_categories_matching_the_series_filter(tmp_path):
+    data = make_data()
+    summary = {
+        "a": {"first_name": "A", "last_name": "Alpha", "division": "FSO", "class": "Gold", "categories": ["Senior", "Lady"], "raw_time": 1, "total_time": 1, "points_down": 0, "steel_misses": 0, "penalties": {}, "dnf": False, "dq": False},
+        "b": {"first_name": "B", "last_name": "Beta", "division": "FSO", "class": "Gold", "categories": ["Lady"], "raw_time": 2, "total_time": 2, "points_down": 0, "steel_misses": 0, "penalties": {}, "dnf": False, "dq": False},
+    }
+    config = load_config(config_file(tmp_path, """series:
+  best_lady:
+    type: best_shooter
+    group_by: [category]
+    filters:
+      categories:
+        include: [Lady]
+    min_competitors: [1, 2]
+"""))
+
+    output = generate_diplomas(summary, data.definition, config)["diplomas"]["best_lady"]
+
+    assert [(item["category"], item["shooter"]["first_name"]) for item in output] == [("Lady", "A"), ("Lady", "B")]
+
+
 def test_filters_and_filter_parts_are_optional(tmp_path):
     config = load_config(config_file(tmp_path, """series:
   all:

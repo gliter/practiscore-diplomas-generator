@@ -305,6 +305,12 @@ def _groups(summary: Mapping[str, Mapping[str, Any]], config: SeriesConfig) -> d
         if not _eligible(uid, shooter, config):
             continue
         category_values = shooter.get("categories", []) if "category" in config.group_by else [None]
+        if "category" in config.group_by:
+            category_values = [
+                category
+                for category in category_values
+                if _matches(category, config.filters["category"])
+            ]
         if not category_values:
             category_values = []
         for category in category_values:

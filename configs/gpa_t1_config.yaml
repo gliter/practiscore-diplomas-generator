@@ -24,6 +24,7 @@ maps:
     "Law Enforcement.*": LAW ENFORCEMENT
     "Military.*": MILITARY
     "Veteran.*": VETERAN
+    "Interstellar.*": INTERSTELLAR
   class_code_map:
     "Double Platinum.*": DOUBLE PLATINUM
     "Platinum.*": PLATINUM
@@ -35,6 +36,12 @@ maps:
     1: CHAMPION
     2: 2nd PLACE
     3: 3rd PLACE
+  category_place:
+    1: HIGH
+    2: 2nd
+    3: 3rd
+    4: 4th
+    5: 5th
 
 series:
   best_in_division:
@@ -113,7 +120,7 @@ series:
     exclude_dnf: true
     ineligible_penalties: []
     text:
-      first_line: "HIGH"
+      first_line: "{{ category_place(place) }}"
       second_line: "{{ category_code_map(category) }}"
 
   best_in_category:
@@ -132,7 +139,7 @@ series:
     exclude_dnf: true
     ineligible_penalties: []
     text:
-      first_line: "HIGH"
+      first_line: "{{ category_place(place) }}"
       second_line: "{{ category_code_map(category) }}"
 
   fastest:
