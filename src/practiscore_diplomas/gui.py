@@ -30,6 +30,22 @@ EXTRA = {
     "en": {"search": "Search by name, division, category or class", "details": "Shooter details", "first_name": "First name", "last_name": "Last name", "division": "Division", "categories": "Categories", "class": "Class", "shooter_id": "Shooter ID", "penalties": "Penalties", "chrono_failure": "Chrono failure", "uid": "UID", "result": "Result", "edit_shooters": "Edit shooters", "edit_shooters_button": "Edit shooter data", "edit_config": "Edit", "save_config": "Save", "save_config_as": "Save as", "config_editor": "Edit configuration", "apply_config": "Apply", "discard_config": "Discard", "config_unapplied": "Changes not applied yet. Click Apply to validate and use them.", "config_apply_prompt": "Apply the configuration edits before closing?\nConfiguration file: {}", "config_valid": "Valid configuration.", "config_pending_status": "Configuration changed in memory. Recalculate diploma data to apply it.", "config_invalid": "Invalid configuration: {}", "unsaved_config_title": "Unsaved configuration", "unsaved_config_prompt": "The configuration has unsaved changes:\n{}\nSave before closing?", "save_close": "Save", "save_as_close": "Save as", "discard_close": "Discard changes", "cancel_close": "Cancel", "new_row": "New row…", "save_shooters": "Save changes", "unsaved_title": "Unsaved shooter changes", "unsaved_prompt": "Save changes to the shooter summary before closing?", "parse_source_title": "Shooter data source", "parse_source_prompt": "Choose which shooter data to use.", "use_pcs": "Data from .pcs ({})", "use_summary": "Data from summary ({})", "source_path": "File: {}", "cancel_label": "Cancel", "stale_warning": "Diploma rows were manually changed. Regenerate diploma data from the updated shooter summary and discard those manual diploma changes?", "stale_status": "Shooter data changed, but diploma data was not regenerated. Click ‘Regenerate diploma data’ to update it.", "recalculate_prompt": "Recalculate diploma data from the shooter summary and discard manual diploma edits?", "raw_time": "Raw time", "points_down": "Points down", "steel_misses": "Steel misses", "penalty": "Penalty", "penalty_seconds": "Penalty", "total_time": "Total time", "dnf": "DNF", "dq": "DQ", "sort_ascending": "Sort ascending", "sort_descending": "Sort descending", "filter_column": "Filter this column…", "clear_filter": "Clear this column filter", "filter_title": "Column filter", "filter_prompt": "Choose the values to show. Click several values to include them all.", "select_all": "Select all", "select_none": "Select none", "apply_filter": "Apply", "clear_all": "Clear filter", "cancel_label": "Cancel", "generate_open": "Generate diplomas and open", "open_error": "The document was generated, but could not be opened: {}", "confirm_title": "Remove diploma", "confirm_remove": "Remove the diploma for {name} (place {place})?"},
     "pl": {"search": "Szukaj po imieniu, nazwisku, dywizji, kategorii lub klasie", "details": "Dane strzelca", "first_name": "Imię", "last_name": "Nazwisko", "division": "Dywizja", "categories": "Kategorie", "class": "Klasa", "shooter_id": "ID strzelca", "penalties": "Kary", "chrono_failure": "Błąd chrono", "uid": "UID", "result": "Wynik", "edit_shooters": "Edytuj strzelców", "edit_shooters_button": "Edytuj dane strzelców", "edit_config": "Edytuj", "save_config": "Zapisz", "save_config_as": "Zapisz jako", "config_editor": "Edytuj konfigurację", "apply_config": "Zastosuj", "discard_config": "Odrzuć", "config_unapplied": "Zmiany nie są jeszcze zastosowane. Kliknij Zastosuj, aby je sprawdzić i użyć.", "config_apply_prompt": "Zastosować zmiany konfiguracji przed zamknięciem?\nPlik konfiguracji: {}", "config_valid": "Konfiguracja jest poprawna.", "config_pending_status": "Konfiguracja zmieniona w pamięci. Przelicz dane dyplomów, aby ją zastosować.", "config_invalid": "Błędna konfiguracja: {}", "unsaved_config_title": "Niezapisana konfiguracja", "unsaved_config_prompt": "Konfiguracja ma niezapisane zmiany:\n{}\nZapisać przed zamknięciem?", "save_close": "Zapisz", "save_as_close": "Zapisz jako", "discard_close": "Odrzuć zmiany", "cancel_close": "Anuluj", "new_row": "Nowy wiersz…", "save_shooters": "Zapisz zmiany", "unsaved_title": "Niezapisane zmiany strzelców", "unsaved_prompt": "Zapisać zmiany w podsumowaniu strzelców przed zamknięciem?", "parse_source_title": "Źródło danych strzelców", "parse_source_prompt": "Wybierz, których danych strzelców użyć.", "use_pcs": "Dane z .pcs ({})", "use_summary": "Dane z podsumowania ({})", "source_path": "Plik: {}", "cancel_label": "Anuluj", "stale_warning": "Wiersze dyplomów zostały zmienione ręcznie. Czy przeliczyć dane dyplomów na podstawie aktualnych danych strzelców i odrzucić ręczne zmiany dyplomów?", "stale_status": "Dane strzelców zostały zmienione, ale dane dyplomów nie zostały przeliczone. Kliknij „Przelicz dane dyplomów”, aby je zaktualizować.", "recalculate_prompt": "Przeliczyć dane dyplomów na podstawie podsumowania strzelców i odrzucić ręczne zmiany w dyplomach?", "raw_time": "Czas surowy", "points_down": "Punkty stracone", "steel_misses": "Chybienia do stali", "penalty": "Kary", "penalty_seconds": "Kary", "total_time": "Czas łączny", "dnf": "DNF", "dq": "DQ", "sort_ascending": "Sortuj rosnąco", "sort_descending": "Sortuj malejąco", "filter_column": "Filtruj tę kolumnę…", "clear_filter": "Wyczyść filtr kolumny", "filter_title": "Filtr kolumny", "filter_prompt": "Wybierz widoczne wartości. Kliknij kilka wartości, aby pokazać je wszystkie.", "select_all": "Zaznacz wszystkie", "select_none": "Odznacz wszystkie", "apply_filter": "Zastosuj", "clear_all": "Wyczyść filtr", "cancel_label": "Anuluj", "generate_open": "Generuj dyplomy i otwórz", "open_error": "Dokument został wygenerowany, ale nie można go otworzyć: {}", "confirm_title": "Usuń dyplom", "confirm_remove": "Usunąć dyplom strzelca {name} (miejsce {place})?"},
 }
+EXTRA["en"]["restored_status"] = "Diploma data restored from {}. You can generate the document or recalculate to replace these rows."
+EXTRA["pl"]["restored_status"] = "Wczytano zapisane dane dyplomów z {}. Możesz wygenerować dokument lub przeliczyć dane, zastępując te wiersze."
+EXTRA["en"].update({
+    "diploma_source_title": "Diploma data source",
+    "diploma_source_prompt": "Saved diploma data differs from awards calculated from the current shooter data and configuration. Choose which data to use.",
+    "use_saved_diplomas": "Use saved data",
+    "regenerate_diplomas": "Generate again",
+    "diploma_source_warning": "Generating again replaces the saved diploma data, including manual edits.",
+})
+EXTRA["pl"].update({
+    "diploma_source_title": "Źródło danych dyplomów",
+    "diploma_source_prompt": "Zapisane dane dyplomów różnią się od danych wyliczonych z aktualnych strzelców i konfiguracji. Wybierz, których danych użyć.",
+    "use_saved_diplomas": "Użyj danych z pliku",
+    "regenerate_diplomas": "Wygeneruj ponownie",
+    "diploma_source_warning": "Ponowne generowanie zastąpi zapisane dane dyplomów, w tym ręczne poprawki.",
+})
 TEXT_FIELDS = dict(line1="first_line", line2="second_line", line3="third_line", line4="fourth_line")
 SHOOTER_FIELDS = dict(id="shooter_id", first="first_name", last="last_name")
 
@@ -71,6 +87,104 @@ def _save_settings(path: Path, settings: dict[str, Any]) -> None:
         os.replace(temporary_path, path)
     finally:
         if temporary_path and temporary_path.exists():
+            temporary_path.unlink()
+
+
+def _diploma_data(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    diplomas: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        record = deepcopy(row)
+        series = record.pop("_series")
+        diplomas.setdefault(series, []).append(record)
+    return {"diplomas": diplomas}
+
+
+def _diploma_rows(data: Any) -> list[dict[str, Any]]:
+    if not isinstance(data, dict) or not isinstance(data.get("diplomas"), dict):
+        raise ValueError("Diploma data must contain a 'diplomas' mapping")
+    rows = []
+    for series, records in data["diplomas"].items():
+        if not isinstance(series, str) or not isinstance(records, list):
+            raise ValueError("Diploma series must map names to lists of records")
+        for record in records:
+            if not isinstance(record, dict) or not isinstance(record.get("shooter", {}), dict):
+                raise ValueError(f"Invalid diploma record in series {series!r}")
+            rows.append({**deepcopy(record), "_series": series})
+    return rows
+
+
+def _compare_restored_diplomas(
+    saved_rows: list[dict[str, Any]],
+    summary: dict[str, Any],
+    definition: dict[str, Any],
+    configs: dict[str, Any],
+) -> tuple[list[dict[str, Any]], bool]:
+    """Calculate a baseline without changing restored rows or their YAML file."""
+    baseline = _diploma_rows(generate_diplomas(summary, definition, configs))
+    return baseline, saved_rows != baseline
+
+
+def _choose_diploma_source(parent: tk.Tk, path: Path, messages: dict[str, str]) -> str | None:
+    dialog = tk.Toplevel(parent)
+    dialog.title(messages["diploma_source_title"])
+    dialog.transient(parent)
+    dialog.resizable(False, False)
+    result = None
+
+    def choose(source: str | None) -> None:
+        nonlocal result
+        result = source
+        dialog.destroy()
+
+    ttk.Label(dialog, text=messages["diploma_source_prompt"], wraplength=560, justify="left").grid(
+        row=0, column=0, columnspan=2, padx=18, pady=(18, 10), sticky="w"
+    )
+    ttk.Label(dialog, text=messages["source_path"].format(path.resolve()), wraplength=560, justify="left").grid(
+        row=1, column=0, columnspan=2, padx=18, pady=(0, 10), sticky="w"
+    )
+    ttk.Label(dialog, text=messages["diploma_source_warning"], wraplength=560, justify="left").grid(
+        row=2, column=0, columnspan=2, padx=18, pady=(0, 14), sticky="w"
+    )
+    ttk.Button(dialog, text=messages["use_saved_diplomas"], command=lambda: choose("saved")).grid(
+        row=3, column=0, padx=(18, 6), pady=(0, 12), sticky="ew"
+    )
+    ttk.Button(dialog, text=messages["regenerate_diplomas"], command=lambda: choose("regenerate")).grid(
+        row=3, column=1, padx=(6, 18), pady=(0, 12), sticky="ew"
+    )
+    ttk.Button(dialog, text=messages["cancel_label"], command=lambda: choose(None)).grid(
+        row=4, column=1, padx=18, pady=(0, 16), sticky="e"
+    )
+    dialog.columnconfigure(0, weight=1)
+    dialog.columnconfigure(1, weight=1)
+    dialog.bind("<Escape>", lambda _event: choose(None))
+    dialog.protocol("WM_DELETE_WINDOW", lambda: choose(None))
+    dialog.update_idletasks()
+    width, height = dialog.winfo_reqwidth(), dialog.winfo_reqheight()
+    x = max(0, (dialog.winfo_screenwidth() - width) // 2)
+    y = max(0, (dialog.winfo_screenheight() - height) // 2)
+    dialog.geometry(f"{width}x{height}+{x}+{y}")
+    dialog.grab_set()
+    dialog.focus_set()
+    dialog.wait_window()
+    return result
+
+
+def _load_diploma_rows(path: Path) -> list[dict[str, Any]]:
+    return _diploma_rows(yaml.safe_load(path.read_text(encoding="utf-8")))
+
+
+def _save_diploma_rows(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Replace the snapshot atomically so a failed save keeps the previous file."""
+    data = _diploma_data(rows)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, suffix=".tmp", delete=False) as stream:
+            temporary_path = Path(stream.name)
+            yaml.safe_dump(data, stream, allow_unicode=True, sort_keys=False)
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
             temporary_path.unlink()
 
 
@@ -426,6 +540,9 @@ def launch_gui(language: str | None = None) -> int:
     data: dict[str, Any] | None = None
     match_definition: dict[str, Any] | None = None
     summary_file: Path | None = None
+    diploma_file: Path | None = None
+    active_match_path = ""
+    diplomas_restored = False
     generated_rows: list[dict[str, Any]] = []
     diplomas_stale = False
     recalculate_button: ttk.Button | None = None
@@ -512,7 +629,7 @@ def launch_gui(language: str | None = None) -> int:
                 elif target == "config":
                     load_config_source(selected)
                     if shooter_summary:
-                        regenerate_diplomas()
+                        recalculate_after_config_change()
                 return
             chosen = filedialog.askopenfilename(
                 title=caption,
@@ -536,7 +653,7 @@ def launch_gui(language: str | None = None) -> int:
                         paths[target].set(config_loaded_path or last_selected[target])
                         return
                     if shooter_summary:
-                        regenerate_diplomas()
+                        recalculate_after_config_change()
             else:
                 paths[target].set(last_selected[target])
             selectors[target].focus_set()
@@ -646,7 +763,7 @@ def launch_gui(language: str | None = None) -> int:
         update_config_buttons()
         schedule_save()
         if shooter_summary:
-            if rows != generated_rows and not messagebox.askyesno(
+            if has_manual_diploma_edits() and not messagebox.askyesno(
                 extra["edit_shooters"], extra["stale_warning"], parent=root
             ):
                 diplomas_stale = True
@@ -745,7 +862,7 @@ def launch_gui(language: str | None = None) -> int:
             config_status.set(extra["config_valid"])
             update_config_buttons()
             if shooter_summary:
-                if rows != generated_rows and not messagebox.askyesno(
+                if has_manual_diploma_edits() and not messagebox.askyesno(
                     extra["edit_shooters"], extra["stale_warning"], parent=root
                 ):
                     diplomas_stale = True
@@ -1053,13 +1170,35 @@ def launch_gui(language: str | None = None) -> int:
         else:
             record[TEXT_FIELDS.get(col, col)] = value
 
+    def has_manual_diploma_edits() -> bool:
+        return diplomas_restored or rows != generated_rows
+
+    def save_manual_diplomas(previous_rows: list[dict[str, Any]]) -> None:
+        nonlocal data, rows
+        try:
+            if diploma_file is None:
+                raise OSError("No diploma data file selected")
+            _save_diploma_rows(diploma_file, rows)
+            data = _diploma_data(rows)
+        except (OSError, yaml.YAMLError) as exc:
+            rows = previous_rows
+            messagebox.showerror(error, str(exc), parent=root)
+
+    def recalculate_after_config_change() -> None:
+        if has_manual_diploma_edits() and not messagebox.askyesno(
+            extra["edit_shooters"], extra["recalculate_prompt"], parent=root
+        ):
+            set_diplomas_stale(extra["config_pending_status"])
+        else:
+            regenerate_diplomas()
+
     def update_recalculate_button() -> None:
         if recalculate_button is None:
             return
-        has_manual_edits = rows != generated_rows
+        has_manual_edits = has_manual_diploma_edits()
         should_enable = data is not None and bool(shooter_summary) and (has_manual_edits or diplomas_stale)
         recalculate_button.state(["!disabled"] if should_enable else ["disabled"])
-        recalculate_button.configure(style="Stale.TButton" if diplomas_stale else "TButton")
+        recalculate_button.configure(style="Stale.TButton" if diplomas_stale or diplomas_restored else "TButton")
 
     def set_diplomas_stale(message: str | None = None) -> None:
         nonlocal diplomas_stale
@@ -1069,7 +1208,7 @@ def launch_gui(language: str | None = None) -> int:
             status.set(message)
 
     def regenerate_diplomas() -> bool:
-        nonlocal data, rows, generated_rows, diplomas_stale, series_configs
+        nonlocal data, rows, generated_rows, diplomas_stale, diplomas_restored, series_configs
         config_path = Path(paths["config"].get()) if paths["config"].get() else None
         if match_definition is None or config_path is None or not config_path.is_file():
             return False
@@ -1079,20 +1218,18 @@ def launch_gui(language: str | None = None) -> int:
                     return False
             configs = load_config_text(config_buffer or "", str(config_path))
             replacement = generate_diplomas(shooter_summary, match_definition, configs)
-            if summary_file is not None:
-                _write_yaml(_match_output_path("diplomas-data", match_definition.get("match_name")), replacement)
+            replacement_rows = _diploma_rows(replacement)
+            if diploma_file is not None:
+                _save_diploma_rows(diploma_file, replacement_rows)
         except Exception as exc:
             messagebox.showerror(error, str(exc), parent=root)
             return False
         series_configs = configs
         data = replacement
-        rows = []
-        for series, entries in data["diplomas"].items():
-            for record in entries:
-                record["_series"] = series
-                rows.append(record)
+        rows = replacement_rows
         generated_rows = deepcopy(rows)
         diplomas_stale = False
+        diplomas_restored = False
         refresh_rows()
         status.set(empty if not rows else loaded.format(len(rows)))
         return True
@@ -1120,55 +1257,97 @@ def launch_gui(language: str | None = None) -> int:
         return result[0]
 
     def process_selected_match(*_args) -> None:
-        nonlocal match_definition, shooter_summary, summary_file, diplomas_stale
+        nonlocal match_definition, shooter_summary, summary_file, diploma_file, diplomas_stale
+        nonlocal data, rows, generated_rows, diplomas_restored, series_configs, active_match_path
         selected = Path(paths["match"].get()) if paths["match"].get() else None
         if selected is None or not selected.is_file():
             return
-        previous_definition, previous_summary_file = match_definition, summary_file
         try:
             match = load_match_data(selected)
-            match_definition = dict(match.definition)
-            summary_file = _match_output_path("shooters-summary", match.definition.get("match_name"))
+            candidate_definition = dict(match.definition)
+            candidate_summary_file = _match_output_path("shooters-summary", match.definition.get("match_name"))
             parsed_summary = parse_match_data(match)
             summary = None
-            if summary_file.is_file():
+            if candidate_summary_file.is_file():
                 pcs_time = datetime.fromtimestamp(selected.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
-                summary_time = datetime.fromtimestamp(summary_file.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                summary_time = datetime.fromtimestamp(candidate_summary_file.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
                 try:
-                    existing_summary = yaml.safe_load(summary_file.read_text(encoding="utf-8"))
+                    existing_summary = yaml.safe_load(candidate_summary_file.read_text(encoding="utf-8"))
                     if not isinstance(existing_summary, dict) or not all(isinstance(k, str) and isinstance(v, dict) for k, v in existing_summary.items()):
                         raise ValueError("Shooter summary must be a mapping of UID to shooter records")
                     migrated_summary = _upgrade_legacy_summary(existing_summary, parsed_summary)
                 except Exception as exc:
-                    messagebox.showerror(error, str(exc), parent=root)
-                    return
+                    raise ValueError(f"{candidate_summary_file}: {exc}") from exc
                 if _summaries_equal(parsed_summary, migrated_summary):
                     summary = migrated_summary
                     if migrated_summary != existing_summary:
-                        _write_yaml(summary_file, migrated_summary)
+                        _write_yaml(candidate_summary_file, migrated_summary)
                 else:
-                    choice = choose_summary_source(selected, pcs_time, summary_file, summary_time)
+                    choice = choose_summary_source(selected, pcs_time, candidate_summary_file, summary_time)
                     if choice is None:
-                        match_definition, summary_file = previous_definition, previous_summary_file
+                        paths["match"].set(active_match_path)
+                        last_selected["match"] = active_match_path
                         return
                     if choice == "summary":
                         summary = migrated_summary
                         if migrated_summary != existing_summary:
-                            _write_yaml(summary_file, migrated_summary)
+                            _write_yaml(candidate_summary_file, migrated_summary)
             if summary is None:
                 summary = parsed_summary
-                _write_yaml(summary_file, summary)
+                _write_yaml(candidate_summary_file, summary)
+            candidate_file = _match_output_path("diplomas-data", match.definition.get("match_name"))
+            saved_rows = _load_diploma_rows(candidate_file) if candidate_file.is_file() else None
+            baseline = []
+            differs = saved_rows is not None
+            candidate_configs = {}
+            should_regenerate = saved_rows is None
+            config_path = paths["config"].get()
+            if config_path and Path(config_path).is_file():
+                try:
+                    candidate_configs = load_config_text(config_buffer or "", config_path)
+                    if saved_rows is not None:
+                        baseline, differs = _compare_restored_diplomas(
+                            saved_rows, summary, candidate_definition, candidate_configs
+                        )
+                        if differs:
+                            choice = _choose_diploma_source(root, candidate_file, extra)
+                            if choice is None:
+                                paths["match"].set(active_match_path)
+                                last_selected["match"] = active_match_path
+                                return
+                            should_regenerate = choice == "regenerate"
+                except Exception as exc:
+                    messagebox.showerror(error, str(exc), parent=root)
+            match_definition = candidate_definition
+            summary_file = candidate_summary_file
+            active_match_path = str(selected)
             shooter_summary = summary
-            diplomas_stale = True
-            regenerate_diplomas()
+            diploma_file = candidate_file
+            rows = saved_rows if saved_rows is not None else []
+            generated_rows = baseline
+            data = _diploma_data(rows) if saved_rows is not None else None
+            diplomas_restored = differs
+            diplomas_stale = False
+            series_configs = candidate_configs
+            refresh_rows()
+            if saved_rows is not None:
+                if diplomas_restored:
+                    status.set(extra["restored_status"].format(diploma_file.resolve()))
+                else:
+                    status.set(empty if not rows else loaded.format(len(rows)))
+            if should_regenerate:
+                diplomas_stale = saved_rows is None
+                regenerate_diplomas()
         except Exception as exc:
+            paths["match"].set(active_match_path)
+            last_selected["match"] = active_match_path
             messagebox.showerror(error, str(exc), parent=root)
 
     def load():
         if not shooter_summary:
             process_selected_match()
             return
-        if not (diplomas_stale or rows != generated_rows):
+        if not (diplomas_stale or has_manual_diploma_edits()):
             return
         if not messagebox.askyesno(
             extra["edit_shooters"], extra["recalculate_prompt"], parent=root
@@ -1586,7 +1765,7 @@ def launch_gui(language: str | None = None) -> int:
                 return
             shooter_summary = deepcopy(edited)
             dialog.destroy()
-            has_manual_diplomas = rows != generated_rows
+            has_manual_diplomas = has_manual_diploma_edits()
             if has_manual_diplomas:
                 if not messagebox.askyesno(
                     extra["edit_shooters"], extra["stale_warning"], parent=root
@@ -1643,15 +1822,26 @@ def launch_gui(language: str | None = None) -> int:
         editor.place(x=x, y=y, width=width, height=height)
         editor.insert(0, str(tree.set(iid, col)))
         editor.focus_set()
+        committed = False
         def commit(_event=None):
+            nonlocal committed
+            if committed:
+                return
+            committed = True
             value = editor.get()
             row_index = int(iid)
+            previous_rows = deepcopy(rows)
             put(rows[row_index], col, value)
+            save_manual_diplomas(previous_rows)
             editor.destroy()
             refresh_rows(row_index)
         editor.bind("<Return>", commit)
         editor.bind("<FocusOut>", commit)
-        editor.bind("<Escape>", lambda _event: editor.destroy())
+        def cancel_edit(_event=None):
+            nonlocal committed
+            committed = True
+            editor.destroy()
+        editor.bind("<Escape>", cancel_edit)
     tree.bind("<Double-1>", edit)
 
 
@@ -1672,7 +1862,9 @@ def launch_gui(language: str | None = None) -> int:
             "shooter": {},
         }
         record = _new_diploma_row(source, uid, shooter_summary, ())
+        previous_rows = deepcopy(rows)
         rows.append(record)
+        save_manual_diplomas(previous_rows)
         refresh_rows(len(rows) - 1)
 
     def new_row_click(event):
@@ -1695,9 +1887,11 @@ def launch_gui(language: str | None = None) -> int:
             return
         series_config = series_configs.get(rows[index]["_series"])
         group_by = series_config.group_by if series_config else ("division", "class", "category")
+        previous_rows = deepcopy(rows)
         _assign_shooter(rows[index], uid, shooter_summary, group_by)
         if series_config:
             refresh_generated_lines(rows[index])
+        save_manual_diplomas(previous_rows)
         refresh_rows(index)
 
     def action_for_row(action: str, event):
@@ -1713,7 +1907,9 @@ def launch_gui(language: str | None = None) -> int:
                 extra["confirm_remove"].format(name=name, place=rows[index].get("place", "")),
                 parent=root,
             ):
+                previous_rows = deepcopy(rows)
                 rows.pop(index)
+                save_manual_diplomas(previous_rows)
                 refresh_rows(min(index, len(rows) - 1) if rows else None)
         elif action == "switch":
             tree.selection_set(row_id)
@@ -1747,11 +1943,7 @@ def launch_gui(language: str | None = None) -> int:
         if not output:
             return
         try:
-            reviewed = {"diplomas": {}}
-            for row in rows:
-                record = {key: value for key, value in row.items() if key != "_series"}
-                reviewed["diplomas"].setdefault(row["_series"], []).append(record)
-            render_diploma_data(reviewed, template, Path(output))
+            render_diploma_data(_diploma_data(rows), template, Path(output))
             status.set(saved.format(output))
             if open_after:
                 try:

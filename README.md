@@ -30,7 +30,8 @@ For automation, run `parse` and `render` directly:
 .\practiscore-diplomas.exe render -d "diplomas-data-Match.yaml" -t "templates\example-diploma-template.docx" -o "diplomas.docx"
 ```
 
-`uv` is only needed when running the project from source; it is not required to use the packaged executable. See the user guides for the full workflow, configuration, template fields, output formats, and troubleshooting.
+The packaged executable requires neither Python nor `uv`. The user guides also describe running from source with `uv`. See the user guides for the full workflow, configuration, template fields, output formats, and troubleshooting.
+
 ## Development
 
 The project targets Python 3.10 or newer and uses `uv` for environment management:
@@ -39,6 +40,15 @@ The project targets Python 3.10 or newer and uses `uv` for environment managemen
 uv sync --dev
 uv run pytest
 ```
+
+To run the GUI or terminal menu from source:
+
+```powershell
+uv run practiscore-diplomas
+uv run practiscore-diplomas -I
+```
+
+For CLI commands from source, replace `.\practiscore-diplomas.exe` in the examples with `uv run practiscore-diplomas`.
 
 The parser reads current `match_scores` data and shooter definitions from `match_def.json`. It produces a shooter summary keyed by PractiScore `sh_uid`, with the visible competitor number stored separately as `shooter_id`. The GUI and CLI both use the same parser, award configuration, and document rendering code.
 
@@ -50,3 +60,15 @@ pwsh -File .\scripts\build_windows.ps1 -Version 0.1.1
 ```
 
 The build script uses PyInstaller. It packages the executable, example configurations, user guides, templates, and license. Generated build files are written under `build/` and `dist/`.
+
+## Python API
+
+The parser also works independently of award configuration:
+
+```python
+from practiscore_diplomas import parse_match
+
+summary = parse_match("match-export.zip")
+```
+
+`parse_match` accepts an archive or unpacked export directory. `parse_match_file` and `parse_match_directory` are available for explicit input types. The summary contains raw shooter records and a `_match_options` entry used to calculate scores.

@@ -1,4 +1,9 @@
 from pathlib import Path
+
+import pytest
+import yaml
+
+import practiscore_diplomas.gui as gui
 from practiscore_diplomas.gui import EXTRA, _upgrade_legacy_summary, _summaries_equal, _load_settings, _save_settings, _settings_path, _assign_shooter, _file_choices, _filtered_shooter_uids, _filter_sort_items, _matches_column_filters, _new_diploma_row, _next_place, _shooter_display_values, _penalty_label, _sort_value
 
 
@@ -220,3 +225,166 @@ def test_penalty_label_shows_match_value_in_seconds():
     assert _penalty_label("Miss", {"Miss": 5, "Procedural": 0.5}) == "Miss (5 s)"
     assert _penalty_label("Procedural", {"Miss": 5, "Procedural": 0.5}) == "Procedural (0.5 s)"
     assert _penalty_label("Legacy penalty", {"Miss": 5}) == "Legacy penalty"
+
+
+def test_diploma_snapshot_restores_manual_edits_added_removed_and_switched_rows(tmp_path):
+    path = tmp_path / "results" / "diplomas.yaml"
+    rows = [
+        {"_series": "division", "place": 2, "first_line": "Original", "shooter": {"shooter_uid": "one"}},
+        {"_series": "division", "place": 1, "first_line": "Winner", "shooter": {"shooter_uid": "two"}},
+    ]
+    gui._save_diploma_rows(path, rows)
+    edited = gui._load_diploma_rows(path)
+    edited[0]["first_line"] = "Ręcznie poprawiony tekst"
+    edited[0]["shooter"] = {"shooter_uid": "other", "first_name": "Alex"}
+    edited.pop(1)
+    edited.append({"_series": "", "place": 1, "first_line": "", "shooter": {"shooter_uid": "new"}})
+
+    gui._save_diploma_rows(path, edited)
+    restored = gui._load_diploma_rows(path)
+
+    assert restored == edited
+    assert restored[0]["first_line"] == "Ręcznie poprawiony tekst"
+    assert restored[0]["shooter"]["shooter_uid"] == "other"
+    assert restored[1]["_series"] == ""
+    assert rows[0]["first_line"] == "Original"
+    persisted = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert "_series" not in persisted["diplomas"]["division"][0]
+    assert list(persisted["diplomas"]) == ["division", ""]
+
+
+def test_diploma_snapshot_preserves_an_intentionally_empty_table(tmp_path):
+    path = tmp_path / "diplomas.yaml"
+    gui._save_diploma_rows(path, [{"_series": "award", "place": 1}])
+    gui._save_diploma_rows(path, [])
+
+    assert path.is_file()
+    assert gui._load_diploma_rows(path) == []
+    assert yaml.safe_load(path.read_text(encoding="utf-8")) == {"diplomas": {}}
+
+
+def test_failed_diploma_snapshot_save_preserves_the_previous_file(monkeypatch, tmp_path):
+    path = tmp_path / "diplomas.yaml"
+    original = [{"_series": "award", "place": 1, "first_line": "Keep this"}]
+    gui._save_diploma_rows(path, original)
+
+    def fail_replace(*args):
+        raise PermissionError("File is locked")
+
+    monkeypatch.setattr(gui.os, "replace", fail_replace)
+    with pytest.raises(PermissionError):
+        gui._save_diploma_rows(path, [])
+
+    assert gui._load_diploma_rows(path) == original
+    assert list(tmp_path.iterdir()) == [path]
+
+
+@pytest.mark.parametrize("data", [None, [], {}, {"diplomas": []}, {"diplomas": {"award": {}}}, {"diplomas": {"award": [None]}}, {"diplomas": {"award": [{"shooter": []}]}}])
+def test_malformed_diploma_snapshots_are_rejected_without_changing_the_file(tmp_path, data):
+    path = tmp_path / "diplomas.yaml"
+    content = yaml.safe_dump(data)
+    path.write_text(content, encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        gui._load_diploma_rows(path)
+
+    assert path.read_text(encoding="utf-8") == content
+
+
+@pytest.mark.parametrize("edit", ["none", "text", "remove"])
+def test_restored_diplomas_are_compared_with_current_awards_without_overwriting(tmp_path, edit):
+    configs = gui.load_config_text("""
+series:
+  award:
+    type: best_shooter
+    min_competitors: [1]
+    text:
+      first_line: "{{ shooter.first_name }}"
+      second_line: "{{ place }}"
+""")
+    summary = {"uid": {"first_name": "Alex", "last_name": "Example", "raw_time": 12, "total_time": 12, "points_down": 0, "steel_misses": 0, "categories": [], "penalties": {}}}
+    definition = {"match_penalties": []}
+    original = gui._diploma_rows(gui.generate_diplomas(summary, definition, configs))
+    path = tmp_path / "diplomas.yaml"
+    gui._save_diploma_rows(path, original)
+    saved = gui._load_diploma_rows(path)
+    if edit == "text":
+        saved[0]["first_line"] = "Manual award text"
+    elif edit == "remove":
+        saved.clear()
+    gui._save_diploma_rows(path, saved)
+    contents = path.read_bytes()
+
+    baseline, differs = gui._compare_restored_diplomas(saved, summary, definition, configs)
+
+    assert baseline == original
+    assert differs is (edit != "none")
+    assert path.read_bytes() == contents
+    assert gui._load_diploma_rows(path) == saved
+
+
+def test_empty_restored_diplomas_match_an_empty_generated_ranking():
+    configs = gui.load_config_text("""
+series:
+  award:
+    type: best_shooter
+    min_competitors: [1]
+    text:
+      first_line: Award
+      second_line: Place
+""")
+
+    baseline, differs = gui._compare_restored_diplomas([], {}, {}, configs)
+
+    assert baseline == []
+    assert differs is False
+
+
+@pytest.mark.parametrize("action, expected", [("use_saved_diplomas", "saved"), ("regenerate_diplomas", "regenerate"), ("cancel_label", None), ("close", None), ("escape", None)])
+def test_diploma_source_dialog_returns_explicit_choice_and_displays_path(monkeypatch, tmp_path, action, expected):
+    messages = gui.EXTRA["pl"]
+    labels = []
+    buttons = {}
+    callbacks = {}
+
+    class Dialog:
+        def __getattr__(self, name):
+            if name.startswith("winfo_"):
+                return lambda: 600
+            return lambda *args, **kwargs: None
+
+        def bind(self, event, callback):
+            callbacks[event] = callback
+
+        def protocol(self, event, callback):
+            callbacks[event] = callback
+
+        def wait_window(self):
+            if action == "close":
+                callbacks["WM_DELETE_WINDOW"]()
+            elif action == "escape":
+                callbacks["<Escape>"](None)
+            else:
+                buttons[messages[action]]()
+
+    class Widget:
+        def __init__(self, parent, text, command=None, **kwargs):
+            if command is None:
+                labels.append(text)
+            else:
+                buttons[text] = command
+
+        def grid(self, **kwargs):
+            pass
+
+    monkeypatch.setattr(gui.tk, "Toplevel", lambda parent: Dialog())
+    monkeypatch.setattr(gui.ttk, "Label", Widget)
+    monkeypatch.setattr(gui.ttk, "Button", Widget)
+    path = tmp_path / "diplomas.yaml"
+
+    result = gui._choose_diploma_source(object(), path, messages)
+
+    assert result == expected
+    assert any(str(path.resolve()) in label for label in labels)
+    assert messages["diploma_source_warning"] in labels
+    assert not path.exists()
