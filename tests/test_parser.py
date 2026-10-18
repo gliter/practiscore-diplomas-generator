@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from practiscore_diplomas.parser import MatchParseError, MatchData, parse_match, parse_match_data
+from practiscore_diplomas.parser import MatchParseError, MatchData, derive_score_fields, parse_match, parse_match_data
 
 
 def make_data() -> MatchData:
@@ -14,6 +14,9 @@ def make_data() -> MatchData:
             "match_pointsdownvalue": 0.5,
             "match_steelmisspdcount": 10,
             "match_penalties": [{"pen_name": "Miss", "pen_val": 5}, {"pen_name": "Procedural Error", "pen_val": 3}],
+            "match_cats": ["FSO", "CPI"],
+            "match_ctgs": '["Senior", "Lady"]',
+            "match_cls": ["Gold", "Silver"],
             "match_shooters": [
                 {"sh_uid": "shooter-a", "sh_id": "GPA-001", "sh_fn": "Test", "sh_ln": "Alpha", "sh_dvp": "FSO", "sh_grd": "Gold", "sh_ctgs": '["Senior"]'},
                 {"sh_uid": "shooter-b", "sh_fn": "Test", "sh_ln": "Bravo", "sh_dvp": "CPI", "sh_grd": "Silver", "sh_ctgs": "[]", "sh_dq": True},
@@ -38,8 +41,12 @@ def test_aggregates_scores_and_penalties():
     assert participant["penalties"] == {"Miss": 1, "Procedural Error": 1}
     assert participant["points_down"] == 3
     assert participant["steel_misses"] == 1
-    assert participant["penalty_seconds"] == 14.5
-    assert participant["total_time"] == 32.5
+    assert "penalty_seconds" not in participant
+    assert "total_time" not in participant
+    assert derive_score_fields(participant, result["_match_options"]) == {
+        "penalty_seconds": 14.5,
+        "total_time": 32.5,
+    }
 
 
 def test_excludes_shooter_without_score():
@@ -52,7 +59,8 @@ def test_excludes_deleted_shooter_even_with_score():
     definition["match_shooters"] = [
         {**data.definition["match_shooters"][0], "sh_del": True},
     ]
-    assert parse_match_data(MatchData(definition, data.scores)) == {}
+    result = parse_match_data(MatchData(definition, data.scores))
+    assert set(result) == {"_match_options"}
 
 
 def test_marks_shooter_with_missing_stage_as_dnf():
@@ -65,13 +73,14 @@ def test_marks_shooter_with_missing_stage_as_dnf():
     assert result["shooter-a"]["dnf"] is True
 
 
-def test_marks_failed_chrono_as_dnf_when_enabled():
+def test_records_chrono_failure_separately_from_dnf():
     data = make_data()
     definition = dict(data.definition)
     definition["match_stages"] = [{"stage_uuid": "chrono", "stage_scoretype": "Chrono"}]
     scores = {"match_scores": [{"stage_uuid": "chrono", "stage_stagescores": [{"shtr": "shooter-a", "gear_check": "Fail", "str": [0]}]}]}
-    assert parse_match_data(MatchData(definition, scores))["shooter-a"]["dnf"] is True
-    assert parse_match_data(MatchData(definition, scores), mark_chrono_failure_as_dnf=False)["shooter-a"]["dnf"] is False
+    result = parse_match_data(MatchData(definition, scores))["shooter-a"]
+    assert result["chrono_failure"] is True
+    assert result["dnf"] is False
 
 
 def test_reads_archive_and_directory(tmp_path: Path):
@@ -92,3 +101,16 @@ def test_rejects_missing_archive_member(tmp_path: Path):
         handle.writestr("match_def.json", "{}")
     with pytest.raises(MatchParseError, match="match_scores.json"):
         parse_match(archive)
+
+
+def test_summary_includes_match_definition_options():
+    result = parse_match_data(make_data())
+
+    assert result["_match_options"] == {
+        "divisions": ["FSO", "CPI"],
+        "categories": ["Senior", "Lady"],
+        "classes": ["Gold", "Silver"],
+        "penalty_values": {"Miss": 5, "Procedural Error": 3},
+        "points_down_value": 0.5,
+        "steel_miss_pd_count": 10,
+    }

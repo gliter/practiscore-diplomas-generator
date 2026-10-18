@@ -24,5 +24,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/practiscore_diplomas"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/practiscore_diplomas/assets/trash-solid.png" = "practiscore_diplomas/assets/trash-solid.png"
+"src/practiscore_diplomas/assets/edit-pencil.png" = "practiscore_diplomas/assets/edit-pencil.png"
+"src/practiscore_diplomas/assets/refresh-double.png" = "practiscore_diplomas/assets/refresh-double.png"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

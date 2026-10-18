@@ -11,6 +11,8 @@ from typing import Any, Mapping
 
 import yaml
 
+from .parser import SUMMARY_OPTIONS_KEY, _definition_options, derive_score_fields
+
 
 class DiplomaDataError(ValueError):
     """Raised when diploma configuration or selection data is invalid."""
@@ -33,10 +35,12 @@ SHOOTER_VARIABLES = {
     "total_time",
     "dnf",
     "dq",
+    "chrono_failure",
     "shooter_uid",
 }
 _EXPRESSION = re.compile(r"{{\s*([^{}]+?)\s*}}")
-_MAP_CALL = re.compile(r"^([A-Za-z_]\w*)\(\s*([a-z_]+(?:\.[a-z_]+)?)\s*\)$")
+_MAP_CALL = re.compile(r"^([A-Za-z_]\w*)\(\s*((?:[A-Za-z_]\w*)(?:\.[A-Za-z_]\w*)?)\s*\)$")
+_VARIABLE = re.compile(r"^(?:[A-Za-z_]\w*)(?:\.[A-Za-z_]\w*)?$")
 
 
 @dataclass(frozen=True)
@@ -128,12 +132,10 @@ def _validate_template(template: Any, context: str, maps: Mapping[str, MapConfig
         expression = match.group(1).strip()
         call = _MAP_CALL.fullmatch(expression)
         if call:
-            map_name, variable = call.groups()
-            if map_name not in maps:
-                raise DiplomaDataError(f"{context} references unknown map {map_name!r}")
-            if not (variable in TEXT_VARIABLES or (variable.startswith("shooter.") and variable[8:] in SHOOTER_VARIABLES)):
-                raise DiplomaDataError(f"{context} references unknown variable {variable!r}")
-        elif not (expression in TEXT_VARIABLES or (expression.startswith("shooter.") and expression[8:] in SHOOTER_VARIABLES)):
+            _map_name, variable = call.groups()
+            if not _VARIABLE.fullmatch(variable):
+                raise DiplomaDataError(f"{context} contains invalid map argument {variable!r}")
+        elif not _VARIABLE.fullmatch(expression):
             raise DiplomaDataError(f"{context} contains invalid expression {expression!r}")
         cursor = match.end()
     if "{{" in template[cursor:] or "}}" in template[cursor:]:
@@ -162,7 +164,12 @@ def _render_template(template: str, record: Mapping[str, Any], config: SeriesCon
 
     def value_for(variable: str) -> Any:
         if variable.startswith("shooter."):
-            return record.get("shooter", {}).get(variable[8:])
+            field = variable[8:]
+            if field not in SHOOTER_VARIABLES:
+                raise DiplomaDataError(f"{context} references unknown shooter field {field!r}")
+            return record.get("shooter", {}).get(field)
+        if variable not in TEXT_VARIABLES:
+            raise DiplomaDataError(f"{context} references unknown field {variable!r}")
         return values.get(variable)
 
     def replace(match: re.Match[str]) -> str:
@@ -170,7 +177,10 @@ def _render_template(template: str, record: Mapping[str, Any], config: SeriesCon
         call = _MAP_CALL.fullmatch(expression)
         if call:
             map_name, variable = call.groups()
-            return _lookup_map(config.maps[map_name], value_for(variable), f"{context} map {map_name!r}")
+            map_config = config.maps.get(map_name)
+            if map_config is None:
+                raise DiplomaDataError(f"{context} references unknown map {map_name!r}")
+            return _lookup_map(map_config, value_for(variable), f"{context} map {map_name!r}")
         value = value_for(expression)
         if value is None:
             raise DiplomaDataError(f"{context} variable {expression!r} is null")
@@ -179,14 +189,39 @@ def _render_template(template: str, record: Mapping[str, Any], config: SeriesCon
     return _EXPRESSION.sub(replace, template)
 
 
+def _render_template_or_error(template: str, record: Mapping[str, Any], config: SeriesConfig, context: str) -> str:
+    """Render one configured line, turning data/map errors into visible review markers."""
+    try:
+        return _render_template(template, record, config, context)
+    except DiplomaDataError as exc:
+        message = str(exc)
+        if message.startswith(context + " "):
+            message = message[len(context) + 1:]
+        if message.startswith("references "):
+            message = message[len("references "):]
+        return f"<błąd: {message}>"
+
+
 def load_config(path: str | Path) -> dict[str, SeriesConfig]:
-    """Load and validate the Feature 2 YAML configuration."""
+    """Load and validate a YAML configuration from disk."""
     config_path = Path(path)
     try:
-        with config_path.open("r", encoding="utf-8") as stream:
-            raw = yaml.safe_load(stream)
-    except (OSError, yaml.YAMLError) as exc:
+        content = config_path.read_text(encoding="utf-8")
+    except OSError as exc:
         raise DiplomaDataError(f"Could not read config {config_path}: {exc}") from exc
+    return load_config_text(content, str(config_path))
+
+
+def load_config_text(content: str, source: str = "in-memory configuration") -> dict[str, SeriesConfig]:
+    """Parse and validate YAML configuration held in memory."""
+    try:
+        raw = yaml.safe_load(content)
+    except yaml.YAMLError as exc:
+        raise DiplomaDataError(f"Could not parse config {source}: {exc}") from exc
+    return _load_config_data(raw)
+
+
+def _load_config_data(raw: Any) -> dict[str, SeriesConfig]:
     root = _mapping(raw, "config")
     raw_series = _mapping(root.get("series"), "series")
     if not raw_series:
@@ -277,7 +312,7 @@ def _matches_any(value: str, patterns: tuple[str, ...]) -> bool:
 def _eligible(uid: str, shooter: Mapping[str, Any], config: SeriesConfig) -> bool:
     if config.exclude_dq and shooter.get("dq", False):
         return False
-    if config.exclude_dnf and shooter.get("dnf", False):
+    if config.exclude_dnf and (shooter.get("dnf", False) or (config.mark_chrono_failure_as_dnf and shooter.get("chrono_failure", False))):
         return False
     if _matches_any(str(shooter.get("last_name", "")), config.excluded_surnames):
         return False
@@ -302,6 +337,8 @@ def _eligible(uid: str, shooter: Mapping[str, Any], config: SeriesConfig) -> boo
 def _groups(summary: Mapping[str, Mapping[str, Any]], config: SeriesConfig) -> dict[tuple[str, ...], list[tuple[str, Mapping[str, Any], int]]]:
     groups: dict[tuple[str, ...], list[tuple[str, Mapping[str, Any], int]]] = {}
     for source_index, (uid, shooter) in enumerate(summary.items()):
+        if uid == SUMMARY_OPTIONS_KEY:
+            continue
         if not _eligible(uid, shooter, config):
             continue
         category_values = shooter.get("categories", []) if "category" in config.group_by else [None]
@@ -337,6 +374,18 @@ def _metric(shooter: Mapping[str, Any], config_type: str, steel_miss_pd_count: D
 def generate_diplomas(summary: Mapping[str, Mapping[str, Any]], definition: Mapping[str, Any], configs: Mapping[str, SeriesConfig]) -> dict[str, list[dict[str, Any]]]:
     """Generate selected diploma records from a shooter summary."""
     steel_miss_pd_count = Decimal(str(definition.get("match_steelmisspdcount", 0)))
+    match_options = summary.get(SUMMARY_OPTIONS_KEY, {})
+    if not isinstance(match_options, Mapping) or "penalty_values" not in match_options:
+        match_options = _definition_options(definition)
+    has_score_options = any(key in match_options for key in ("penalty_values", "points_down_value", "steel_miss_pd_count"))
+    calculated_summary = {
+        uid: (
+            {**shooter, **derive_score_fields(shooter, match_options)}
+            if uid != SUMMARY_OPTIONS_KEY and (has_score_options or "total_time" not in shooter)
+            else shooter
+        )
+        for uid, shooter in summary.items()
+    }
     declared_penalties = {str(item.get("pen_name")) for item in definition.get("match_penalties", []) if isinstance(item, dict) and item.get("pen_name")}
     result: dict[str, list[dict[str, Any]]] = {}
     for key, config in configs.items():
@@ -344,7 +393,10 @@ def generate_diplomas(summary: Mapping[str, Mapping[str, Any]], definition: Mapp
         if unknown:
             raise DiplomaDataError(f"series.{key}.ineligible_penalties contains unknown penalties: {sorted(unknown)}")
         records: list[dict[str, Any]] = []
-        for group_key, members in _groups(summary, config).items():
+        groups = _groups(calculated_summary, config)
+        # Keep the original group order for ties, while prioritizing the largest groups.
+        ordered_groups = sorted(groups.items(), key=lambda item: -len(item[1]))
+        for group_key, members in ordered_groups:
             diploma_count = sum(1 for threshold in config.min_competitors if len(members) >= threshold)
             if diploma_count == 0:
                 continue
@@ -352,11 +404,12 @@ def generate_diplomas(summary: Mapping[str, Mapping[str, Any]], definition: Mapp
                 members,
                 key=lambda item: (_metric(item[1], config.type, steel_miss_pd_count), Decimal(str(item[1]["total_time"])), str(item[1].get("last_name", "")).casefold(), str(item[1].get("first_name", "")).casefold(), item[2]),
             )
+            group_records: list[dict[str, Any]] = []
             for place, (uid, shooter, _) in enumerate(ranked[:diploma_count], start=1):
                 group_values = dict(zip(config.group_by, group_key))
                 copied_shooter = deepcopy(shooter)
                 copied_shooter["shooter_uid"] = uid
-                records.append({
+                group_records.append({
                     "place": place,
                     "division": group_values.get("division"),
                     "class": group_values.get("class"),
@@ -366,12 +419,13 @@ def generate_diplomas(summary: Mapping[str, Mapping[str, Any]], definition: Mapp
                     "second_line": "",
                     "shooter": copied_shooter,
                 })
-                record = records[-1]
-                record["first_line"] = _render_template(config.first_line_template, record, config, f"series.{key}.text.first_line")
-                record["second_line"] = _render_template(config.second_line_template, record, config, f"series.{key}.text.second_line")
+                record = group_records[-1]
+                record["first_line"] = _render_template_or_error(config.first_line_template, record, config, f"series.{key}.text.first_line")
+                record["second_line"] = _render_template_or_error(config.second_line_template, record, config, f"series.{key}.text.second_line")
                 if config.third_line_template is not None:
-                    record["third_line"] = _render_template(config.third_line_template, record, config, f"series.{key}.text.third_line")
+                    record["third_line"] = _render_template_or_error(config.third_line_template, record, config, f"series.{key}.text.third_line")
                 if config.fourth_line_template is not None:
-                    record["fourth_line"] = _render_template(config.fourth_line_template, record, config, f"series.{key}.text.fourth_line")
+                    record["fourth_line"] = _render_template_or_error(config.fourth_line_template, record, config, f"series.{key}.text.fourth_line")
+            records.extend(reversed(group_records))
         result[key] = records
     return {"diplomas": result}

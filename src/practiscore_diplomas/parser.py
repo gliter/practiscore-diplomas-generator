@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 
+SUMMARY_OPTIONS_KEY = "_match_options"
+
+
 class MatchParseError(ValueError):
     """Raised when a PractiScore export cannot be parsed."""
 
@@ -109,6 +112,69 @@ def _categories(value: Any) -> list[str]:
     return value
 
 
+def _definition_options(definition: Mapping[str, Any]) -> dict[str, Any]:
+    def values(value: Any) -> list[str]:
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                value = [value]
+        if isinstance(value, Mapping):
+            value = list(value)
+        if not isinstance(value, (list, tuple)):
+            return []
+        result: list[str] = []
+        for item in value:
+            if isinstance(item, Mapping):
+                item = item.get("name", item.get("value", ""))
+            text = str(item).strip()
+            if text and text not in result:
+                result.append(text)
+        return result
+
+    division_options = values(definition.get("match_cats"))
+    if not division_options:
+        division_options = values(definition.get("match_divisionpfs"))
+    penalties = definition.get("match_penalties", []) or []
+    penalty_values = {
+        str(item["pen_name"]): _number(_decimal(item.get("pen_val")))
+        for item in penalties
+        if isinstance(item, Mapping) and "pen_name" in item
+    }
+    return {
+        "divisions": division_options,
+        "categories": values(definition.get("match_ctgs")),
+        "classes": values(definition.get("match_cls")),
+        "penalty_values": penalty_values,
+        "points_down_value": _number(_decimal(definition.get("match_pointsdownvalue"))),
+        "steel_miss_pd_count": _number(_decimal(definition.get("match_steelmisspdcount"))),
+    }
+
+
+def derive_score_fields(shooter: Mapping[str, Any], options: Mapping[str, Any]) -> dict[str, int | float]:
+    penalty_values = options.get("penalty_values", {})
+    if not isinstance(penalty_values, Mapping):
+        penalty_values = {}
+    penalties = shooter.get("penalties", {})
+    if not isinstance(penalties, Mapping):
+        penalties = {}
+    declared_seconds = sum(
+        (_decimal(count) * _decimal(penalty_values.get(name)) for name, count in penalties.items()),
+        Decimal(0),
+    )
+    points_down_value = _decimal(options.get("points_down_value"))
+    steel_miss_count = _decimal(options.get("steel_miss_pd_count"))
+    penalty_seconds = (
+        declared_seconds
+        + _decimal(shooter.get("points_down")) * points_down_value
+        + _decimal(shooter.get("steel_misses")) * steel_miss_count * points_down_value
+    )
+    return {
+        "penalty_seconds": _number(penalty_seconds),
+        "total_time": _number(_decimal(shooter.get("raw_time")) + penalty_seconds),
+    }
+
+
 def _shooters(definition: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     values = definition.get("match_shooters", [])
     if not isinstance(values, list):
@@ -139,7 +205,7 @@ def _score_rows(scores: Mapping[str, Any]) -> Iterable[tuple[int, str | None, Ma
             yield stage_index, stage.get("stage_uuid"), row
 
 
-def parse_match_data(data: MatchData, mark_chrono_failure_as_dnf: bool = True) -> dict[str, dict[str, Any]]:
+def parse_match_data(data: MatchData) -> dict[str, dict[str, Any]]:
     definition = data.definition
     shooter_map = _shooters(definition)
     stage_count = len(data.scores.get("match_scores", []))
@@ -148,8 +214,6 @@ def parse_match_data(data: MatchData, mark_chrono_failure_as_dnf: bool = True) -
         for stage in definition.get("match_stages", [])
         if isinstance(stage, dict) and str(stage.get("stage_scoretype", "")).casefold() == "chrono" and stage.get("stage_uuid")
     }
-    points_down_value = _decimal(definition.get("match_pointsdownvalue"))
-    steel_miss_count = _decimal(definition.get("match_steelmisspdcount"))
     penalty_defs = definition.get("match_penalties", []) or []
     if not isinstance(penalty_defs, list):
         raise MatchParseError("match_penalties must be an array")
@@ -166,7 +230,7 @@ def parse_match_data(data: MatchData, mark_chrono_failure_as_dnf: bool = True) -
         uid = str(row["shtr"])
         aggregate = aggregates[uid]
         aggregate["stages"].add(stage_index)
-        if mark_chrono_failure_as_dnf and stage_uuid in chrono_stage_uuids and row.get("gear_check") != "Pass":
+        if stage_uuid in chrono_stage_uuids and row.get("gear_check") != "Pass":
             aggregate["chrono_failed"] = True
         aggregate["raw_time"] += _sum_numbers(row.get("str"))
         counts = row.get("pens", []) or []
@@ -189,11 +253,7 @@ def parse_match_data(data: MatchData, mark_chrono_failure_as_dnf: bool = True) -
         penalties = dict(aggregate["penalties"])
         for name in penalty_values:
             penalties.setdefault(name, 0)
-        declared_seconds = sum((Decimal(count) * penalty_values[name] for name, count in penalties.items() if name in penalty_values), Decimal(0))
-        point_seconds = Decimal(aggregate["points_down"]) * points_down_value
-        steel_seconds = Decimal(aggregate["steel_misses"]) * steel_miss_count * points_down_value
-        penalty_seconds = declared_seconds + point_seconds + steel_seconds
-        dnf = bool(aggregate["dnf"] or aggregate["chrono_failed"] or len(aggregate["stages"]) < stage_count)
+        dnf = bool(aggregate["dnf"] or len(aggregate["stages"]) < stage_count)
         dq = bool(shooter.get("sh_dq", False))
         output[uid] = {
             "shooter_id": shooter.get("sh_id", ""),
@@ -206,11 +266,11 @@ def parse_match_data(data: MatchData, mark_chrono_failure_as_dnf: bool = True) -
             "penalties": penalties,
             "points_down": aggregate["points_down"],
             "steel_misses": aggregate["steel_misses"],
-            "penalty_seconds": _number(penalty_seconds),
-            "total_time": _number(aggregate["raw_time"] + penalty_seconds),
             "dnf": dnf,
+            "chrono_failure": bool(aggregate["chrono_failed"]),
             "dq": dq,
         }
+    output[SUMMARY_OPTIONS_KEY] = _definition_options(definition)  # type: ignore[assignment]
     return output
 
 

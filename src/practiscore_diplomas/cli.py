@@ -22,7 +22,7 @@ _MESSAGES = {
         "description": "Parse PractiScore exports and generate diploma data.",
         "language": "CLI help language (default: system locale)",
         "parse_help": "Create shooter summary and diploma data files.",
-        "parse_input": "PractiScore .psc archive or unpacked export directory",
+        "parse_input": "PractiScore .pcs, .psc, or .zip archive or unpacked export directory",
         "config": "Configuration YAML",
         "summary": "Shooter summary YAML (default: shooters-summary-<match-name>.yaml)",
         "diplomas": "Diploma data YAML (default: diplomas-data-<match-name>.yaml)",
@@ -265,10 +265,10 @@ def _interactive_arguments(language: str) -> list[str]:
     if mode == 1:
         source = _interactive_path(messages["interactive_yaml"], Path("."), ("*.yaml", "*.yml"), messages)
     else:
-        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.psc",), messages)
+        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.pcs", "*.psc", "*.zip"), messages)
     if mode == 2:
         return ["--language", language, "parse", "-i", str(source), "-c", str(config)]
-    template = _interactive_path(messages["interactive_template"], Path("."), ("*.docx", "*.odt"), messages)
+    template = _interactive_path(messages["interactive_template"], Path("templates"), ("*.docx", "*.odt"), messages)
     output = _interactive_output_path(template, source, messages)
     output_option = {
         ".docx": "--output-docx",
@@ -295,6 +295,7 @@ def _build_parser(language: str | None = None) -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--language", choices=tuple(_MESSAGES), default=language, help=messages["language"])
+    parser.add_argument("-I", dest="interactive", action="store_true", help="Start terminal interactive mode")
     commands = parser.add_subparsers(dest="command", required=False)
     parse = commands.add_parser("parse", help=messages["parse_help"], description=messages["parse_help"], epilog=messages["examples"], formatter_class=argparse.RawDescriptionHelpFormatter)
     parse.add_argument("--language", choices=tuple(_MESSAGES), default=argparse.SUPPRESS, help=messages["language"])
@@ -320,12 +321,17 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     language = _language_from_argv(argv)
     parser = _build_parser(language)
-    if not argv and _interactive_terminal():
+    args = parser.parse_args(argv)
+    if args.interactive:
+        if args.command is not None:
+            parser.error("-I cannot be combined with a command")
         result = main(_interactive_arguments(language))
         if result == 0:
             print(_MESSAGES[language]["interactive_success"])
         return result
-    args = parser.parse_args(argv)
+    if not argv:
+        from .gui import launch_gui
+        return launch_gui(language)
     if args.command is None:
         parser.print_help()
         return 0
@@ -336,8 +342,7 @@ def main(argv: list[str] | None = None) -> int:
                     parser.error("--config is required when --input is used")
                 match = load_match_data(args.input)
                 configs = load_config(args.config)
-                mark_chrono_failure_as_dnf = next(iter(configs.values())).mark_chrono_failure_as_dnf
-                summary = parse_match_data(match, mark_chrono_failure_as_dnf=mark_chrono_failure_as_dnf)
+                summary = parse_match_data(match)
                 diploma_data = generate_diplomas(summary, match.definition, configs)
                 _write_yaml(_match_output_path("shooters-summary", match.definition.get("match_name")), summary)
                 _write_yaml(_match_output_path("diplomas-data", match.definition.get("match_name")), diploma_data)
@@ -354,8 +359,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         match = load_match_data(args.input)
         configs = load_config(args.config)
-        mark_chrono_failure_as_dnf = next(iter(configs.values())).mark_chrono_failure_as_dnf
-        summary = parse_match_data(match, mark_chrono_failure_as_dnf=mark_chrono_failure_as_dnf)
+        summary = parse_match_data(match)
         diplomas = generate_diplomas(summary, match.definition, configs)
         summary_output = args.summary_output or _match_output_path("shooters-summary", match.definition.get("match_name"))
         diplomas_output = args.diplomas_data or _match_output_path("diplomas-data", match.definition.get("match_name"))
