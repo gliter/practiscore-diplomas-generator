@@ -546,6 +546,7 @@ def launch_gui(language: str | None = None) -> int:
     generated_rows: list[dict[str, Any]] = []
     diplomas_stale = False
     recalculate_button: ttk.Button | None = None
+    recalculate_frame: tk.Frame | None = None
     rows: list[dict[str, Any]] = []
     shooter_summary: dict[str, Any] = {}
     series_configs: dict[str, Any] = {}
@@ -1198,7 +1199,9 @@ def launch_gui(language: str | None = None) -> int:
         has_manual_edits = has_manual_diploma_edits()
         should_enable = data is not None and bool(shooter_summary) and (has_manual_edits or diplomas_stale)
         recalculate_button.state(["!disabled"] if should_enable else ["disabled"])
-        recalculate_button.configure(style="Stale.TButton" if diplomas_stale or diplomas_restored else "TButton")
+        recalculate_button.configure(style="Stale.TButton" if should_enable else "TButton")
+        if recalculate_frame is not None:
+            recalculate_frame.configure(background="#ef6c00" if should_enable else root.cget("background"))
 
     def set_diplomas_stale(message: str | None = None) -> None:
         nonlocal diplomas_stale
@@ -1963,8 +1966,12 @@ def launch_gui(language: str | None = None) -> int:
     button_style = ttk.Style(root)
     button_style.configure("Stale.TButton", background="#ffcc80", foreground="#5d3200")
     button_style.map("Stale.TButton", background=[("active", "#ffb74d")])
-    recalculate_button = ttk.Button(root, text=review_label, command=load, state="disabled")
-    recalculate_button.grid(row=3, column=0, padx=9, pady=5, sticky="w")
+    # A Tk frame keeps the orange border visible under native Windows themes.
+    # Reserve the same padding while disabled to avoid moving the controls.
+    recalculate_frame = tk.Frame(root, background=root.cget("background"), padx=4, pady=4, borderwidth=0)
+    recalculate_frame.grid(row=3, column=0, padx=9, pady=5, sticky="w")
+    recalculate_button = ttk.Button(recalculate_frame, text=review_label, command=load, state="disabled")
+    recalculate_button.pack()
     update_recalculate_button()
     generate_actions = ttk.Frame(root)
     generate_actions.grid(row=3, column=1, columnspan=2, padx=5, pady=5, sticky="e")

@@ -41,7 +41,7 @@ Przejrzyj tabelę dyplomów przed utworzeniem dokumentu:
 - Wybór strzelca ma taką samą tabelę z sortowaniem i filtrowaniem. Wyszukiwarka znajduje po imieniu, nazwisku, dywizji, kategorii i klasie.
 - Wiersze z błędem w szablonie linii są podświetlone na czerwono. W błędnej linii pojawia się krótki komunikat `<błąd: ...>`, a generowanie pozostałych dyplomów trwa dalej. Popraw konfigurację i przelicz dane ponownie albo ręcznie zastąp komunikat właściwym tekstem.
 
-Zmiana danych strzelców lub zastosowanie konfiguracji automatycznie przelicza dyplomy, jeśli nie było ręcznych poprawek w tabeli dyplomów. W przeciwnym razie możesz potwierdzić zastąpienie poprawek lub je zachować. Jeśli je zachowasz, **Przelicz dane dyplomów** podświetli się na pomarańczowo, a status poinformuje o nieaktualnych danych. Kliknij ten przycisk, gdy chcesz wygenerować wiersze od nowa; zastąpi on ręczne poprawki. Przycisk jest nieaktywny, gdy nie ma nic do przeliczenia.
+Zmiana danych strzelców lub zastosowanie konfiguracji automatycznie przelicza dyplomy, jeśli nie było ręcznych poprawek w tabeli dyplomów. W przeciwnym razie możesz potwierdzić zastąpienie poprawek lub je zachować. Jeśli je zachowasz, **Przelicz dane dyplomów** podświetli się na pomarańczowo, a status poinformuje o nieaktualnych danych. Kliknij ten przycisk, gdy chcesz wygenerować wiersze od nowa; zastąpi on ręczne poprawki. Aktywny przycisk ma wyraźną pomarańczową ramkę. Przycisk jest nieaktywny, gdy nie ma nic do przeliczenia.
 
 Filtry tabeli służą do przeglądania wierszy; nie wykluczają dyplomów z dokumentu wynikowego. Aby zmienić zawartość wydruku, usuń niepotrzebne wiersze lub zmień konfigurację nagród.
 

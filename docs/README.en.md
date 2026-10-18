@@ -41,7 +41,7 @@ Review the diploma table before generating the document:
 - The shooter picker uses the same sortable and filterable table. Its search matches names, divisions, categories, and classes.
 - Rows with a template-line error are highlighted red. The affected line shows a short `<błąd: ...>` message, while the other diplomas are still generated. Correct the configuration and recalculate, or replace the error text manually.
 
-Changing shooter data or applying a configuration recalculates diplomas automatically if there are no manual diploma edits. Otherwise, you can confirm replacing the edits or keep them. If you keep them, **Regenerate diploma data** turns orange and the status bar indicates that the diplomas are out of date. Use that button when you are ready to regenerate; it replaces the manually edited rows. The button is disabled when there is nothing to recalculate.
+Changing shooter data or applying a configuration recalculates diplomas automatically if there are no manual diploma edits. Otherwise, you can confirm replacing the edits or keep them. If you keep them, **Regenerate diploma data** turns orange and the status bar indicates that the diplomas are out of date. Use that button when you are ready to regenerate; it replaces the manually edited rows. An enabled button has a prominent orange border. The button is disabled when there is nothing to recalculate.
 
 Table filters help you review the rows; they do not exclude diplomas from the generated document. Remove unwanted rows or change the award configuration to change what is printed.
 
