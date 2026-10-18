@@ -45,10 +45,10 @@ Warto zachować je razem z dokumentacją meczu, jeśli chcesz później sprawdzi
 
 ## Użycie w terminalu
 
-Zainstaluj zależności poleceniem `uv sync`, a następnie uruchom interaktywny tryb terminala:
+Do korzystania z wersji Windows nie potrzebujesz `uv`. Otwórz PowerShell w folderze z programem i uruchom tryb interaktywny:
 
 ```powershell
-uv run practiscore-diplomas -I
+.\practiscore-diplomas.exe -I
 ```
 
 Opcja `-I` otwiera menu obsługiwane strzałkami i klawiszem Enter. Zwykłe uruchomienie programu otwiera GUI. Do powtarzalnych zadań i automatyzacji używaj poleceń `parse` i `render`.
@@ -56,13 +56,13 @@ Opcja `-I` otwiera menu obsługiwane strzałkami i klawiszem Enter. Zwykłe uruc
 Sparsuj archiwum i utwórz pomocnicze pliki YAML:
 
 ```powershell
-uv run practiscore-diplomas parse -i "mecz.zip" -c "configs\gpa_t1_config.yaml"
+.\practiscore-diplomas.exe parse -i "mecz.zip" -c "configs\gpa_t1_config.yaml"
 ```
 
 Wygeneruj dokument bezpośrednio z archiwum:
 
 ```powershell
-uv run practiscore-diplomas render `
+.\practiscore-diplomas.exe render `
   -i "mecz.zip" `
   -c "configs\gpa_t1_config.yaml" `
   -t "templates\example-diploma-template.docx" `
@@ -72,7 +72,7 @@ uv run practiscore-diplomas render `
 Wygeneruj dokument ze sprawdzonych wcześniej danych dyplomów:
 
 ```powershell
-uv run practiscore-diplomas render `
+.\practiscore-diplomas.exe render `
   -d "diplomas-data-Nazwa-Meczu.yaml" `
   -t "templates\example-diploma-template.docx" `
   --output-docx "dyplomy.docx"

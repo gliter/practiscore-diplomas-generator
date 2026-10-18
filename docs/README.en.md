@@ -45,10 +45,10 @@ Keep these files with the match records if you want to review or reuse the parse
 
 ## Use The Command Line
 
-Install the project with `uv sync`, then run the terminal interactive workflow with:
+You do not need `uv` to use the Windows release. Open PowerShell in the folder containing the executable and start the interactive terminal workflow:
 
 ```powershell
-uv run practiscore-diplomas -I
+.\practiscore-diplomas.exe -I
 ```
 
 The `-I` option opens the arrow-key and Enter menu. Running the executable normally opens the GUI. For repeatable commands or automation, use `parse` and `render` directly.
@@ -56,13 +56,13 @@ The `-I` option opens the arrow-key and Enter menu. Running the executable norma
 Parse an archive and create the review YAML files:
 
 ```powershell
-uv run practiscore-diplomas parse -i "match-export.zip" -c "configs\gpa_t1_config.yaml"
+.\practiscore-diplomas.exe parse -i "match-export.zip" -c "configs\gpa_t1_config.yaml"
 ```
 
 Render directly from an archive:
 
 ```powershell
-uv run practiscore-diplomas render `
+.\practiscore-diplomas.exe render `
   -i "match-export.zip" `
   -c "configs\gpa_t1_config.yaml" `
   -t "templates\example-diploma-template.docx" `
@@ -72,7 +72,7 @@ uv run practiscore-diplomas render `
 Render previously reviewed diploma data:
 
 ```powershell
-uv run practiscore-diplomas render `
+.\practiscore-diplomas.exe render `
   -d "diplomas-data-Match-Name.yaml" `
   -t "templates\example-diploma-template.docx" `
   --output-docx "diplomas.docx"

@@ -15,30 +15,22 @@ Create diploma documents from PractiScore match results. The application parses 
 
 The application also accepts an unpacked PractiScore export directory from the command line. The GUI lists match files in its working directory and includes a file browser option for each input.
 
-### Run from source with uv
+### Command line and interactive mode
 
-Install the project environment and dependencies, then start the GUI:
-
-```powershell
-uv sync
-uv run practiscore-diplomas
-```
-
-Add `-I` to open the terminal interactive workflow instead:
+The Windows executable includes both the GUI and CLI. Open PowerShell in the extracted package folder and add `-I` for the interactive terminal menu:
 
 ```powershell
-uv run practiscore-diplomas -I
+.\practiscore-diplomas.exe -I
 ```
 
-For automation, the `parse` and `render` commands can be run separately. For example:
+For automation, run `parse` and `render` directly:
 
 ```powershell
-uv run practiscore-diplomas parse -i "match-export.zip" -c "configs\gpa_t1_config.yaml"
-uv run practiscore-diplomas render -d "diplomas-data-Match.yaml" -t "templates\example-diploma-template.docx" -o "diplomas.docx"
+.\practiscore-diplomas.exe parse -i "match-export.zip" -c "configs\gpa_t1_config.yaml"
+.\practiscore-diplomas.exe render -d "diplomas-data-Match.yaml" -t "templates\example-diploma-template.docx" -o "diplomas.docx"
 ```
 
-See the user guides for the full GUI workflow, editing shooter data, award configuration, template fields, output formats, and troubleshooting.
-
+`uv` is only needed when running the project from source; it is not required to use the packaged executable. See the user guides for the full workflow, configuration, template fields, output formats, and troubleshooting.
 ## Development
 
 The project targets Python 3.10 or newer and uses `uv` for environment management:
