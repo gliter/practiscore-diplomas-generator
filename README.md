@@ -2,13 +2,17 @@
 
 Create diploma documents from PractiScore match results. The application parses shooter data, applies award rules, lets you review the diploma list, and generates one DOCX, ODT, or PDF document.
 
+**[Download the latest Windows package](https://github.com/gliter/practiscore-diplomas-generator/releases/latest/download/practiscore-diplomas-generator-windows-x64.zip)**
+
+This link always downloads the package from the latest published release.
+
 **User guides:** [English](docs/README.en.md) · [Polski](docs/README.pl.md)
 
 ## Quick Start
 
 ### Windows application
 
-1. Download and extract the Windows package.
+1. [Download the latest Windows package](https://github.com/gliter/practiscore-diplomas-generator/releases/latest/download/practiscore-diplomas-generator-windows-x64.zip) and extract it.
 2. Keep the `configs` and `templates` folders beside `practiscore-diplomas.exe`.
 3. Double-click the executable. Choose a PractiScore `.pcs`, `.psc`, or `.zip` match archive, an award configuration, and a DOCX/ODT template.
 4. Review the diploma rows, then choose **Generate diplomas…** or **Generate diplomas and open**.

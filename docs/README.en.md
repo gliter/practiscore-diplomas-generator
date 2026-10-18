@@ -8,7 +8,7 @@ Start with the graphical workflow below, or go directly to [terminal use](#use-t
 
 ## Create Diplomas In The Graphical App
 
-You need three inputs: a final PractiScore export, a YAML award configuration from `configs` (or your own copy), and a DOCX/ODT template from `templates` (or your own design). Download and extract the Windows release package before starting; Python and `uv` are not required.
+You need three inputs: a final PractiScore export, a YAML award configuration from `configs` (or your own copy), and a DOCX/ODT template from `templates` (or your own design). [Download the latest Windows package](https://github.com/gliter/practiscore-diplomas-generator/releases/latest/download/practiscore-diplomas-generator-windows-x64.zip) and extract it before starting; Python and `uv` are not required.
 
 ### 1. Export the match
 

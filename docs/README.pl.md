@@ -8,7 +8,7 @@ Zacznij od opisu pracy w GUI poniżej albo przejdź do [terminala](#użycie-w-te
 
 ## Generowanie dyplomów w GUI
 
-Przygotuj trzy pliki: końcowy eksport z PractiScore, konfigurację nagród YAML z `configs` (lub własną kopię) i szablon DOCX/ODT z `templates` (lub własny projekt). Przed rozpoczęciem pobierz i rozpakuj pakiet Windows; Python ani `uv` nie są wymagane.
+Przygotuj trzy pliki: końcowy eksport z PractiScore, konfigurację nagród YAML z `configs` (lub własną kopię) i szablon DOCX/ODT z `templates` (lub własny projekt). Przed rozpoczęciem [pobierz najnowszy pakiet Windows](https://github.com/gliter/practiscore-diplomas-generator/releases/latest/download/practiscore-diplomas-generator-windows-x64.zip) i rozpakuj go; Python ani `uv` nie są wymagane.
 
 ### 1. Wyeksportuj mecz
 
