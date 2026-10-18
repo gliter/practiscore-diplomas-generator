@@ -1,66 +1,88 @@
 # PractiScore Diplomas Generator
 
-Create diploma documents from a PractiScore match export. The program reads the results, applies your award rules, and creates one document containing all selected diplomas.
+Create one diploma document from a PractiScore match export. This guide walks through the normal workflow in the Windows graphical app. You can also use the command line if you prefer.
 
-This guide is for match organizers. You do not need Python or any programming tools to use the Windows application.
+## Create Diplomas In The Graphical App
 
-## What You Need
+### 1. Export the match
 
-Before starting, prepare these files:
+In PractiScore, finish and verify the match, then choose **Import / Export** → **Export Match**. Save the exported archive. The app accepts `.pcs`, `.psc`, and `.zip` files; all three are ZIP archives. An unpacked export directory is also supported when using the command line.
 
-| Item | What it is |
-| --- | --- |
-| PractiScore export | The `.pcs`, `.psc`, or `.zip` archive exported from PractiScore after the match. |
-| Configuration | A YAML file that defines award rules. Ready-to-use examples are in the `configs` folder. |
-| Diploma template | A `.docx` or `.odt` document containing the text placeholders described below. |
+### 2. Choose the match, award configuration, and template
 
-Keep the `configs` and `templates` folders next to `practiscore-diplomas.exe`. Put match exports in the working directory; the GUI lists `.pcs`/`.psc`/`.zip` files there, YAML configs in `configs`, and DOCX/ODT templates in `templates`. Each list also offers **Choose another file…**.
+Double-click `practiscore-diplomas.exe`. The dropdowns list match archives from the working directory, configurations from `configs`, and DOCX/ODT templates from `templates`. Choose **Choose another file…** to browse elsewhere. Keep `configs` and `templates` beside the executable when using the packaged Windows app.
 
-## Export The Match From PractiScore
+As soon as you choose a match, the app parses the shooter data and saves `shooters-summary-<match-name>.yaml` in the working directory. If a summary for that match already exists and differs from the fresh parse, the app shows both file paths and modification times. Choose **Data from .pcs** to use the new export or **Data from summary** to keep your edited summary. If both versions are identical, no prompt is shown.
 
-Export the match only after scores and match status are final.
+Choose the award configuration and diploma template. The configuration determines who qualifies and what award series are created. The template controls the document layout. Diploma rows appear in the main table when the required inputs are available.
+To edit a configuration in the app, select it and click **Edit**. Click **Apply** to validate and use the changes in memory; use **Save** or **Save as** to write them to a file. If you close the app with unsaved configuration changes, you can save, save as, discard, or cancel.
 
-1. On the main match screen, choose **Import / Export**.
+### 3. Review the shooters and diploma rows
 
-   ![PractiScore main match screen with Import / Export highlighted](psc-1.png)
+Use **Edit shooter data** beside the match selector to review or correct shooter records. Changes are kept in the editor until you choose **Save changes**. Division and class use match-provided dropdown values; categories and penalties have dedicated editors. Calculated penalty seconds and total time are shown for reference. Saving the shooter summary updates the YAML file and regenerates diploma data. If diploma rows were manually edited, the app asks whether to discard those edits before recalculating.
 
-2. In the **Match Import/Export** section, choose **Export Match**.
+Review the diploma table before generating the document:
 
-   ![PractiScore Import / Export screen with Export Match highlighted](psc-2.png)
+- Double-click a cell to edit it. The red **×** removes a row after confirmation; the blue switch icon changes its shooter. Use **New row…** to add a diploma.
+- Use the column headings to sort or filter. Filters can include multiple values, and a dot in a heading indicates an active filter.
+- The shooter picker uses the same sortable and filterable table. Its search matches names, divisions, categories, and classes.
+- Rows with a template-line error are highlighted red. The affected line shows a short `<błąd: ...>` message, while the other diplomas are still generated. Correct the configuration and recalculate, or replace the error text manually.
 
-3. Save the exported match file. Select this file as the PractiScore export when creating diplomas.
+Within each series, groups are ordered from the largest eligible group to the smallest. Diplomas within a group are listed from the last awarded place to first place.
 
-## Fastest Way To Create Diplomas
+### 4. Generate the document
 
-The application saves its window, last selected file paths, and table layout, sorting, and filters in `%APPDATA%\PractiScore Diplomas\settings.json`. The configuration row has **Edit**, **Save**, and **Save as** controls. The editor opens as a normal resizable, maximizable window. While you type, YAML syntax errors only mark the affected line gently; the full validation error appears after you click **Apply**. During diploma generation, a line that references an unknown field or map, or has no matching map entry is shown as `<błąd: ...>`; the affected diploma row is highlighted red so generation can continue and the problem is visible for review. Applied edits stay in memory and are used when diploma data are recalculated or generated. Save controls are disabled until the configuration changes. Closing the application with unsaved configuration changes offers **Save**, **Save as**, **Discard changes**, or **Cancel**.
+Choose **Generate diplomas…** to save the document, or **Generate diplomas and open** to save it and open it in your system's default application. Choose the output path and format in the save dialog. DOCX and ODT work directly; PDF and cross-format conversion require LibreOffice with `soffice` on `PATH`.
 
-1. Double-click `practiscore-diplomas.exe` to open the graphical interface.
-2. Choose a PCS file. The application immediately parses the shooters and saves `shooters-summary-<match-name>.yaml`. If a summary already exists and differs from a fresh parse, choose **Data from .pcs** or **Data from summary**; both file paths and modification times are shown. Identical data are reused without a prompt.
-3. Choose a configuration to generate diploma data and a DOCX or ODT template. Select **Edit shooters** to edit the summary; saving it regenerates diploma data.
-4. Review the diploma rows, then select **Generate diplomas…** to save the document, or **Generate diplomas and open** to save it and open it with the system default application.
-5. In the save window, accept the suggested filename or choose another one.
-6. Open the generated document and check the first few diplomas before printing.
-
-This workflow also creates two YAML files in the current working directory:
+The app also keeps two review files in the working directory:
 
 ```text
 shooters-summary-<match-name>.yaml
 diplomas-data-<match-name>.yaml
 ```
 
-They are useful for checking who was included and why. Keep them with the match records. The shooter summary also includes a `_match_options` section with divisions, categories, and classes read from `match_def.json`; the editor uses these lists for its dropdowns. The penalty editor shows each penalty with its per-occurrence value in seconds from match_def.json. The section also stores penalty time values, points-down value, and steel-miss points-down count from match_def.json. Shooter records keep raw score inputs only. The editor shows calculated penalty seconds and total time as read-only values, recalculated whenever raw inputs change.
+Keep these files with the match records if you want to review or reuse the parsed shooter data and selected diploma rows later.
 
-## When To Use Each Menu Option
+## Use The Command Line
 
-| Menu option | Use it when |
-| --- | --- |
-| Render diplomas from a PractiScore file | The normal choice. It parses the match, saves review data, and creates the final document in one operation. |
-| Parse a PractiScore file into YAML | You want to inspect or manually adjust the selected diplomas before rendering. |
-| Render diplomas from diploma-data YAML | You already have reviewed `diplomas-data-*.yaml` and want to create the document again, perhaps with a different template. |
+Install the project with `uv sync`, then run the terminal interactive workflow with:
 
-For manual adjustments, first choose **Parse a PractiScore file into YAML**. Open `diplomas-data-<match-name>.yaml` in a text editor, make careful changes, then choose **Render diplomas from diploma-data YAML**. This is useful for correcting a displayed name, removing a specific diploma, or changing text before printing.
+```powershell
+uv run practiscore-diplomas -I
+```
 
-## Choosing A Configuration
+The `-I` option opens the arrow-key and Enter menu. Running the executable normally opens the GUI. For repeatable commands or automation, use `parse` and `render` directly.
+
+Parse an archive and create the review YAML files:
+
+```powershell
+uv run practiscore-diplomas parse -i "match-export.zip" -c "configs\gpa_t1_config.yaml"
+```
+
+Render directly from an archive:
+
+```powershell
+uv run practiscore-diplomas render `
+  -i "match-export.zip" `
+  -c "configs\gpa_t1_config.yaml" `
+  -t "templates\example-diploma-template.docx" `
+  --output-docx "diplomas.docx"
+```
+
+Render previously reviewed diploma data:
+
+```powershell
+uv run practiscore-diplomas render `
+  -d "diplomas-data-Match-Name.yaml" `
+  -t "templates\example-diploma-template.docx" `
+  --output-docx "diplomas.docx"
+```
+
+Use `--output-odt` or `--output-pdf` to select another output format. Output paths are optional. The `parse` command requires a configuration; direct `render -i` also requires one. Use `--help` for all options.
+
+## Award Configuration
+
+### Choose an example configuration
 
 The `configs` folder contains example award rules:
 
@@ -207,7 +229,7 @@ exclude_shooters:
 
 ## Prepare A Diploma Template
 
-Use a DOCX or ODT file as the template. Place placeholders wherever the changing text should appear. For example:
+Use a DOCX or ODT file as the template. Put placeholders where changing text should appear, for example:
 
 ```text
 {{ first_line }}
@@ -215,7 +237,7 @@ Use a DOCX or ODT file as the template. Place placeholders wherever the changing
 {{ shooter.first_name }} {{ shooter.last_name }}
 ```
 
-The program makes one copy of the template for every diploma. It keeps the document formatting, including font, size, alignment, and tables. The release includes `templates/example-diploma-template.docx`, a small working example.
+The program makes one copy of the template for each diploma and preserves its paragraph and table formatting. The package includes `templates/example-diploma-template.docx` and `templates/example-diploma-template.odt`.
 
 ### Template Fields
 
@@ -245,56 +267,15 @@ The program makes one copy of the template for every diploma. It keeps the docum
 | `shooter.dq` | `True` when the competitor is DQ. |
 | `shooter.shooter_uid` | Internal PractiScore identifier. Usually not needed on a diploma. |
 
-Use the exact spelling and braces shown above. Unknown fields stop rendering so that a typo does not silently produce an incorrect diploma.
+Use the exact spelling and braces shown above. An unknown placeholder in the DOCX/ODT template stops document rendering with an error. A bad field or map in a configured diploma line is shown in that diploma row during review.
 
 ## Output Formats
 
-| Output | Notes |
+| Format | Use |
 | --- | --- |
-| DOCX | Best choice when the template is DOCX and you may still edit the document. |
-| ODT | Works directly when using an ODT template. |
-| PDF | Requires LibreOffice installed with `soffice` available on the Windows `PATH`. |
-
-Converting between DOCX and ODT also requires LibreOffice. If you use the interactive mode, the file extension selected in the save window determines the output format.
-
-## Command-Line Use
-
-Double-clicking `practiscore-diplomas.exe` opens the graphical interface. The dropdowns list PractiScore `.pcs`/`.psc`/`.zip` files from the working directory, YAML configs from `configs`, and DOCX/ODT templates from `templates`; each dropdown also has **Choose another file…**. Choose the three inputs, then select **Load and review**. Double-click any table cell to edit the displayed diploma data. Select a row and use **Add diploma row** to create a new row. Choose a shooter; its series starts blank, its place starts at 1, shooter data is filled in, and text and metric fields start blank. Each row has a red **×** control with a confirmation prompt and a blue switch icon to replace that row’s shooter. The shooter picker is a table with columns for first name, surname, division, categories, class, and score. Typing filters by name, division, category, or class. The shooter table uses the same sortable and filterable headings. Click any table heading (marked with ▾) to sort or filter that column. Filters show selectable values; click multiple values to keep all of them, and combine filters across columns. A filled dot in a heading marks an active filter. Select **Generate diplomas** to choose a DOCX, ODT, or PDF output path, or **Generate diplomas and open** to generate the document and open it in the system default application. PDF and cross-format conversion require LibreOffice.
-
-Start the existing terminal interactive workflow explicitly with `practiscore-diplomas -I`. The `parse` and `render` commands continue to work for command-line use.
-
-Within each series, groups are ordered by eligible shooter count, from largest to smallest. Diplomas within each group are listed from the last awarded place to first place.
-
-The graphical interface is recommended for reviewing and generating diplomas. Use `-I` for the terminal interactive workflow. The commands below are useful when repeating the same workflow or automating a known process.
-
-Render directly from a match:
-
-```powershell
-practiscore-diplomas render `
-  -i "match-export.psc" `
-  -c "configs\gpa_t1_config.yaml" `
-  -t "diploma-template.docx" `
-  --output-docx "diplomas.docx"
-```
-
-Create review data only:
-
-```powershell
-practiscore-diplomas parse `
-  -i "match-export.psc" `
-  -c "configs\gpa_t1_config.yaml"
-```
-
-Render reviewed data:
-
-```powershell
-practiscore-diplomas render `
-  -d "diplomas-data-Match-Name.yaml" `
-  -t "diploma-template.docx" `
-  --output-docx "diplomas.docx"
-```
-
-Use `--output-odt` or `--output-pdf` instead of `--output-docx` when needed. The output path after these options is optional; without it, the program creates a sensible default filename.
+| DOCX | Best when you want to edit the generated document. |
+| ODT | Use with an ODT template or when you need an editable ODT document. |
+| PDF | Requires LibreOffice with `soffice` available on `PATH`. |
 
 ## Troubleshooting
 

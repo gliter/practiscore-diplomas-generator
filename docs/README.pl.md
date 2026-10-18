@@ -1,66 +1,88 @@
 # Generator dyplomów PractiScore
 
-Program tworzy dokument z dyplomami na podstawie eksportu meczu z PractiScore. Odczytuje wyniki, stosuje reguły nagród i wybiera zawodników, którzy powinni otrzymać dyplom.
+Program tworzy jeden dokument z dyplomami na podstawie eksportu meczu z PractiScore. Poniżej opisujemy standardową pracę w graficznej wersji Windows. Na końcu znajdziesz także instrukcję użycia w terminalu.
 
-Ta instrukcja jest przeznaczona dla organizatorów zawodów. Do korzystania z wersji Windows nie potrzebujesz Pythona ani narzędzi programistycznych.
+## Generowanie dyplomów w GUI
 
-## Co Przygotować
+### 1. Wyeksportuj mecz
 
-Przed rozpoczęciem przygotuj:
+W PractiScore zakończ i sprawdź wyniki, a następnie wybierz **Import / Export** → **Export Match**. Zapisz wyeksportowane archiwum. Program obsługuje pliki `.pcs`, `.psc` i `.zip` — wszystkie są archiwami ZIP. W wierszu poleceń można też wskazać rozpakowany katalog eksportu.
 
-| Element | Co to jest |
-| --- | --- |
-| Eksport PractiScore | Archiwum `.pcs`, `.psc` albo `.zip` wyeksportowane z PractiScore po zakończeniu meczu. |
-| Konfigurację | Plik YAML zawierający reguły przyznawania dyplomów. Gotowe przykłady są w folderze `configs`. |
-| Szablon dyplomu | Dokument `.docx` albo `.odt` z polami opisanymi dalej w instrukcji. |
+### 2. Wybierz mecz, konfigurację i szablon
 
-Trzymaj foldery `configs` i `templates` obok `practiscore-diplomas.exe`. Pliki meczu umieść w katalogu roboczym. GUI wyświetla z niego pliki `.pcs`/`.psc`/`.zip`, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`. Każda lista zawiera też opcję **Wybierz inny plik…**.
+Kliknij dwukrotnie `practiscore-diplomas.exe`. Listy pokazują pliki meczów z katalogu roboczego, konfiguracje z folderu `configs` oraz szablony DOCX/ODT z folderu `templates`. Wybierz **Wybierz inny plik…**, aby wskazać plik z innego miejsca. Przy korzystaniu z pakietu Windows foldery `configs` i `templates` powinny znajdować się obok pliku EXE.
 
-## Eksport Meczu Z PractiScore
+Po wybraniu meczu program od razu parsuje dane strzelców i zapisuje w katalogu roboczym `shooters-summary-<nazwa-meczu>.yaml`. Jeśli dla tego meczu istnieje już podsumowanie różniące się od świeżego parsowania, zobaczysz ścieżki i czasy modyfikacji obu plików. Wybierz **Dane z .pcs**, aby użyć nowych danych z eksportu, albo **Dane z podsumowania**, aby zachować wcześniej edytowane dane. Jeśli dane są identyczne, pytanie się nie pojawi.
 
-Eksport wykonaj dopiero po zatwierdzeniu wyników i zakończeniu pracy nad meczem.
+Wybierz konfigurację nagród i szablon dyplomu. Konfiguracja określa, kto kwalifikuje się do nagród i jakie serie dyplomów powstaną. Szablon definiuje wygląd dokumentu. Gdy program ma wymagane dane, w głównej tabeli pojawiają się wiersze dyplomów.
+Aby zmienić konfigurację w programie, wybierz ją i kliknij **Edytuj**. **Zastosuj** sprawdza konfigurację i używa zmian w pamięci; **Zapisz** lub **Zapisz jako** zapisuje je do pliku. Przy zamykaniu programu z niezapisanymi zmianami możesz je zapisać, zapisać jako nowy plik, odrzucić albo anulować zamknięcie.
 
-1. Na głównym ekranie meczu wybierz **Import / Export**.
+### 3. Sprawdź strzelców i dyplomy
 
-   ![Główny ekran meczu PractiScore z zaznaczoną opcją Import / Export](psc-1.png)
+Przycisk **Edytuj dane strzelców** obok listy plików meczów otwiera edytor zawodników. Zmiany pozostają w oknie do kliknięcia **Zapisz zmiany**. Dywizję i klasę wybiera się z list, kategorie i kary mają osobne edytory. Wyliczone sekundy kar i czas łączny są widoczne tylko do podglądu. Zapis aktualizuje plik YAML i generuje dane dyplomów ponownie. Jeśli ręcznie zmieniono już wiersze dyplomów, program zapyta, czy odrzucić te zmiany przed przeliczeniem.
 
-2. W sekcji **Match Import/Export** wybierz **Export Match**.
+Przejrzyj tabelę dyplomów przed utworzeniem dokumentu:
 
-   ![Ekran Import / Export w PractiScore z zaznaczoną opcją Export Match](psc-2.png)
+- Dwuklik komórki pozwala ją edytować. Czerwony przycisk **×** usuwa wiersz po potwierdzeniu, a niebieska ikona zmienia przypisanego strzelca. **Nowy wiersz…** dodaje dyplom.
+- Nagłówki kolumn pozwalają sortować i filtrować dane. Filtr może zawierać wiele wartości; kropka w nagłówku oznacza aktywne filtrowanie.
+- Wybór strzelca ma taką samą tabelę z sortowaniem i filtrowaniem. Wyszukiwarka znajduje po imieniu, nazwisku, dywizji, kategorii i klasie.
+- Wiersze z błędem w szablonie linii są podświetlone na czerwono. W błędnej linii pojawia się krótki komunikat `<błąd: ...>`, a generowanie pozostałych dyplomów trwa dalej. Popraw konfigurację i przelicz dane ponownie albo ręcznie zastąp komunikat właściwym tekstem.
 
-3. Zapisz wyeksportowany plik meczu. W generatorze wybierz go jako eksport PractiScore.
+W każdej serii grupy są uporządkowane od największej liczby uprawnionych strzelców do najmniejszej. W obrębie grupy dyplomy są wyświetlane od ostatniego miejsca do pierwszego.
 
-## Najszybszy Sposób Na Dyplomy
+### 4. Wygeneruj dokument
 
-Aplikacja zapisuje ustawienia okna, ścieżki ostatnio wybranych plików oraz układ kolumn, sortowanie i filtry w `%APPDATA%\PractiScore Diplomas\settings.json`. Przy wyborze konfiguracji są przyciski **Edytuj**, **Zapisz** i **Zapisz jako**. Edytor otwiera się jako zwykłe, skalowalne i maksymalizowalne okno. Podczas pisania błędy składni YAML jedynie delikatnie podświetlają linię; pełny komunikat walidacji pojawia się dopiero po kliknięciu **Zastosuj**. Podczas generowania dyplomów linia odwołująca się do nieistniejącego pola lub mapy albo do wartości, której mapa nie zawiera, otrzymuje tekst `<błąd: ...>`. Błędny wiersz dyplomu jest podświetlany na czerwono, a generowanie pozostałych dyplomów trwa dalej. Zastosowane zmiany są przechowywane w pamięci i używane przy przeliczaniu lub generowaniu danych dyplomów. Przyciski zapisu są nieaktywne, dopóki konfiguracja nie zostanie zmieniona. Zamknięcie programu z niezapisanymi zmianami wyświetla opcje **Zapisz**, **Zapisz jako**, **Odrzuć zmiany** i **Anuluj**.
+Wybierz **Generuj dyplomy…**, aby zapisać dokument, albo **Generuj dyplomy i otwórz**, aby zapisać go i otworzyć w domyślnej aplikacji systemu. W oknie zapisu wskaż ścieżkę i format. DOCX i ODT są obsługiwane bezpośrednio. PDF i konwersja między formatami wymagają LibreOffice z programem `soffice` dostępnym w `PATH`.
 
-1. Kliknij dwukrotnie `practiscore-diplomas.exe`, aby otworzyć interfejs graficzny.
-2. Wybierz plik PCS. Program od razu sparsuje strzelców i zapisze `shooters-summary-<nazwa-meczu>.yaml`. Jeśli istniejące podsumowanie różni się od świeżego parsowania, wybierz **Dane z .pcs** albo **Dane z podsumowania**; okno pokaże ścieżki i czasy modyfikacji obu plików. Identyczne dane zostaną użyte bez pytania.
-3. Wybierz konfigurację, aby wygenerować dane dyplomów, oraz szablon DOCX lub ODT. Użyj **Edytuj strzelców**, aby zmienić podsumowanie w tabeli z wyszukiwarką i filtrami. Dywizja i klasa mają listy rozwijane, kategorie obsługują wielokrotny wybór, kary otwierają osobne okno z polami dla każdego typu, a DNF/błąd chrono/DQ to checkboxy. Zapis aktualizuje YAML i ponownie generuje dane dyplomów.
-4. Sprawdź wiersze dyplomów i wybierz **Generuj dyplomy…**, aby zapisać dokument, albo **Generuj dyplomy i otwórz**, aby zapisać go i otworzyć w domyślnej aplikacji systemu.
-5. W oknie zapisu zaakceptuj proponowaną nazwę albo wybierz inną.
-6. Otwórz utworzony dokument i sprawdź kilka pierwszych dyplomów przed drukowaniem.
-
-Program tworzy także dwa pliki YAML w bieżącym katalogu roboczym:
+W katalogu roboczym program zapisuje też dwa pliki pomocnicze:
 
 ```text
 shooters-summary-<nazwa-meczu>.yaml
 diplomas-data-<nazwa-meczu>.yaml
 ```
 
-Służą one do sprawdzenia, kto otrzymał dyplom i dlaczego. Warto zachować je razem z dokumentacją meczu. Podsumowanie strzelców zawiera też sekcję `_match_options` z listami dywizji, kategorii i klas odczytanymi z `match_def.json`; edytor używa tych list w polach wyboru. Edytor kar pokazuje przy każdej karze jej wartość w sekundach za jedno wystąpienie, odczytaną z match_def.json. Sekcja zapisuje też wartości czasowe kar, wartość punktów straconych oraz liczbę punktów straconych za chybienie do poppera z match_def.json. Rekordy strzelców przechowują wyłącznie surowe dane wyniku. Edytor pokazuje wyliczone sekundy kar i czas łączny jako pola tylko do odczytu, przeliczane po zmianie danych surowych.
+Warto zachować je razem z dokumentacją meczu, jeśli chcesz później sprawdzić lub wykorzystać ponownie dane strzelców i wybrane dyplomy.
 
-## Którą Opcję Menu Wybrać
+## Użycie w terminalu
 
-| Opcja menu | Kiedy jej użyć |
-| --- | --- |
-| Wygenerować dyplomy z pliku PractiScore | Zwykły wybór. Program parsuje mecz, zapisuje dane do kontroli i od razu tworzy dokument. |
-| Sparsować plik PractiScore do plików YAML | Chcesz najpierw sprawdzić albo ręcznie zmienić listę dyplomów. |
-| Wygenerować dyplomy z pliku YAML z danymi dyplomów | Masz już sprawdzony plik `diplomas-data-*.yaml` i chcesz ponownie utworzyć dokument, np. z innym szablonem. |
+Zainstaluj zależności poleceniem `uv sync`, a następnie uruchom interaktywny tryb terminala:
 
-Jeżeli potrzebujesz ręcznych zmian, najpierw wybierz **Sparsować plik PractiScore do plików YAML**. Otwórz `diplomas-data-<nazwa-meczu>.yaml` w edytorze tekstu, wprowadź ostrożne poprawki, a następnie wybierz **Wygenerować dyplomy z pliku YAML z danymi dyplomów**. Ten sposób przydaje się np. do poprawienia wyświetlanego nazwiska, usunięcia pojedynczego dyplomu lub zmiany tekstu przed drukiem.
+```powershell
+uv run practiscore-diplomas -I
+```
 
-## Wybór Konfiguracji
+Opcja `-I` otwiera menu obsługiwane strzałkami i klawiszem Enter. Zwykłe uruchomienie programu otwiera GUI. Do powtarzalnych zadań i automatyzacji używaj poleceń `parse` i `render`.
+
+Sparsuj archiwum i utwórz pomocnicze pliki YAML:
+
+```powershell
+uv run practiscore-diplomas parse -i "mecz.zip" -c "configs\gpa_t1_config.yaml"
+```
+
+Wygeneruj dokument bezpośrednio z archiwum:
+
+```powershell
+uv run practiscore-diplomas render `
+  -i "mecz.zip" `
+  -c "configs\gpa_t1_config.yaml" `
+  -t "templates\example-diploma-template.docx" `
+  --output-docx "dyplomy.docx"
+```
+
+Wygeneruj dokument ze sprawdzonych wcześniej danych dyplomów:
+
+```powershell
+uv run practiscore-diplomas render `
+  -d "diplomas-data-Nazwa-Meczu.yaml" `
+  -t "templates\example-diploma-template.docx" `
+  --output-docx "dyplomy.docx"
+```
+
+Użyj `--output-odt` albo `--output-pdf`, aby wybrać inny format. Ścieżka wynikowa jest opcjonalna. Polecenie `parse` wymaga konfiguracji; konfiguracja jest wymagana także przy `render -i`. Pełną listę opcji wyświetla `--help`.
+
+## Konfiguracja nagród
+
+### Wybierz przykładową konfigurację
 
 W folderze `configs` znajdują się przykładowe reguły nagród:
 
@@ -245,56 +267,15 @@ Program tworzy kopię szablonu dla każdego dyplomu. Zachowuje formatowanie doku
 | `shooter.dq` | `True`, gdy zawodnik ma status DQ. |
 | `shooter.shooter_uid` | Wewnętrzny identyfikator PractiScore. Zwykle nie jest potrzebny na dyplomie. |
 
-Używaj dokładnie takiej pisowni i nawiasów klamrowych jak w tabeli. Nieznane pole zatrzyma renderowanie, dzięki czemu literówka nie utworzy błędnego dyplomu bez ostrzeżenia.
+Używaj dokładnie takiej pisowni i nawiasów klamrowych jak w tabeli. Nieznane pole w szablonie DOCX/ODT zatrzyma renderowanie z czytelnym błędem. Błąd mapy albo pola w tekście linii konfiguracji pojawi się bezpośrednio w odpowiednim wierszu tabeli dyplomów.
 
-## Formaty Wynikowe
+## Formaty wynikowe
 
-| Format | Informacja |
+| Format | Zastosowanie |
 | --- | --- |
-| DOCX | Najlepszy wybór dla szablonu DOCX i gdy dokument ma być jeszcze edytowany. |
-| ODT | Działa bezpośrednio przy użyciu szablonu ODT. |
-| PDF | Wymaga zainstalowanego LibreOffice z programem `soffice` dostępnym w `PATH`. |
-
-Konwersja między DOCX i ODT również wymaga LibreOffice. W trybie interaktywnym format wynikowy zależy od rozszerzenia wybranego w oknie zapisu.
-
-## Użycie Z Wiersza Poleceń
-
-Dwukrotne kliknięcie `practiscore-diplomas.exe` otwiera interfejs graficzny. Listy rozwijane pokazują pliki PractiScore `.pcs`/`.psc`/`.zip` z katalogu roboczego, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`; każda lista ma też opcję **Wybierz inny plik…**. Wybierz trzy pliki, a następnie kliknij **Wczytaj i przejrzyj**. Dwukrotne kliknięcie komórki tabeli pozwala edytować wyświetlane dane dyplomu. Zaznacz wiersz i użyj **Dodaj wiersz dyplomu**, aby utworzyć nowy wiersz. Po wybraniu strzelca seria pozostanie pusta, miejsce będzie ustawione na 1, dane strzelca zostaną uzupełnione, a pola tekstowe i metryki pozostaną puste. Każdy wiersz ma czerwony przycisk **×** z prośbą o potwierdzenie oraz niebieską ikonę zmiany strzelca. Wyszukiwarka strzelców ma formę tabeli z kolumnami: imię, nazwisko, dywizja, kategorie, klasa i wynik. Wpisywanie tekstu filtruje po imieniu, nazwisku, dywizji, kategorii lub klasie. Tabela strzelców ma takie same nagłówki z sortowaniem i filtrowaniem. Kliknij dowolny nagłówek oznaczony ▾, aby posortować lub filtrować kolumnę. Filtr pokazuje listę wartości do zaznaczenia; możesz wybrać kilka naraz i łączyć filtry z różnych kolumn. Kropka przy nagłówku oznacza aktywny filtr. Przycisk **Generuj dyplomy** otwiera wybór ścieżki i formatu DOCX, ODT lub PDF. Przycisk **Generuj dyplomy i otwórz** zapisuje dokument, a następnie otwiera go w domyślnej aplikacji systemu. PDF i konwersja między formatami wymagają LibreOffice.
-
-Dotychczasowy tryb interaktywny terminala uruchomisz poleceniem `practiscore-diplomas -I`. Polecenia `parse` i `render` nadal służą do pracy z wiersza poleceń.
-
-W ramach serii grupy są sortowane według liczby uprawnionych strzelców, od największej do najmniejszej. Dyplomy w każdej grupie są wyświetlane od ostatniego miejsca do pierwszego.
-
-Interfejs graficzny jest zalecany do przeglądania i generowania dyplomów. Opcja `-I` uruchamia interaktywny tryb terminala. Poniższe polecenia przydają się przy powtarzaniu procesu lub automatyzacji.
-
-Bezpośrednie generowanie z meczu:
-
-```powershell
-practiscore-diplomas render `
-  -i "match-export.psc" `
-  -c "configs\gpa_t1_config.yaml" `
-  -t "diploma-template.docx" `
-  --output-docx "diplomas.docx"
-```
-
-Tylko utworzenie danych do kontroli:
-
-```powershell
-practiscore-diplomas parse `
-  -i "match-export.psc" `
-  -c "configs\gpa_t1_config.yaml"
-```
-
-Generowanie ze sprawdzonych danych:
-
-```powershell
-practiscore-diplomas render `
-  -d "diplomas-data-Nazwa-Meczu.yaml" `
-  -t "diploma-template.docx" `
-  --output-docx "diplomas.docx"
-```
-
-W razie potrzeby użyj `--output-odt` albo `--output-pdf` zamiast `--output-docx`. Ścieżka po tych opcjach jest opcjonalna; bez niej program utworzy plik o sensownej domyślnej nazwie.
+| DOCX | Najlepszy wybór, gdy dokument ma być jeszcze edytowany. |
+| ODT | Użyj z szablonem ODT lub gdy potrzebujesz edytowalnego pliku ODT. |
+| PDF | Wymaga LibreOffice z programem `soffice` dostępnym w `PATH`. |
 
 ## Rozwiązywanie Problemów
 
