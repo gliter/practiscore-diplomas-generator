@@ -10,11 +10,11 @@ Przed rozpoczęciem przygotuj:
 
 | Element | Co to jest |
 | --- | --- |
-| Eksport PractiScore | Plik `.psc` wyeksportowany z PractiScore po zakończeniu meczu. |
+| Eksport PractiScore | Archiwum `.pcs`, `.psc` albo `.zip` wyeksportowane z PractiScore po zakończeniu meczu. |
 | Konfigurację | Plik YAML zawierający reguły przyznawania dyplomów. Gotowe przykłady są w folderze `configs`. |
 | Szablon dyplomu | Dokument `.docx` albo `.odt` z polami opisanymi dalej w instrukcji. |
 
-Trzymaj foldery `configs` i `templates` obok `practiscore-diplomas.exe`. Pliki meczu umieść w katalogu roboczym. GUI wyświetla z niego pliki `.pcs`/`.psc`, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`. Każda lista zawiera też opcję **Wybierz inny plik…**.
+Trzymaj foldery `configs` i `templates` obok `practiscore-diplomas.exe`. Pliki meczu umieść w katalogu roboczym. GUI wyświetla z niego pliki `.pcs`/`.psc`/`.zip`, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`. Każda lista zawiera też opcję **Wybierz inny plik…**.
 
 ## Eksport Meczu Z PractiScore
 
@@ -259,7 +259,7 @@ Konwersja między DOCX i ODT również wymaga LibreOffice. W trybie interaktywny
 
 ## Użycie Z Wiersza Poleceń
 
-Dwukrotne kliknięcie `practiscore-diplomas.exe` otwiera interfejs graficzny. Listy rozwijane pokazują pliki PractiScore `.pcs`/`.psc` z katalogu roboczego, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`; każda lista ma też opcję **Wybierz inny plik…**. Wybierz trzy pliki, a następnie kliknij **Wczytaj i przejrzyj**. Dwukrotne kliknięcie komórki tabeli pozwala edytować wyświetlane dane dyplomu. Zaznacz wiersz i użyj **Dodaj wiersz dyplomu**, aby utworzyć nowy wiersz. Po wybraniu strzelca seria pozostanie pusta, miejsce będzie ustawione na 1, dane strzelca zostaną uzupełnione, a pola tekstowe i metryki pozostaną puste. Każdy wiersz ma czerwony przycisk **×** z prośbą o potwierdzenie oraz niebieską ikonę zmiany strzelca. Wyszukiwarka strzelców ma formę tabeli z kolumnami: imię, nazwisko, dywizja, kategorie, klasa i wynik. Wpisywanie tekstu filtruje po imieniu, nazwisku, dywizji, kategorii lub klasie. Tabela strzelców ma takie same nagłówki z sortowaniem i filtrowaniem. Kliknij dowolny nagłówek oznaczony ▾, aby posortować lub filtrować kolumnę. Filtr pokazuje listę wartości do zaznaczenia; możesz wybrać kilka naraz i łączyć filtry z różnych kolumn. Kropka przy nagłówku oznacza aktywny filtr. Przycisk **Generuj dyplomy** otwiera wybór ścieżki i formatu DOCX, ODT lub PDF. Przycisk **Generuj dyplomy i otwórz** zapisuje dokument, a następnie otwiera go w domyślnej aplikacji systemu. PDF i konwersja między formatami wymagają LibreOffice.
+Dwukrotne kliknięcie `practiscore-diplomas.exe` otwiera interfejs graficzny. Listy rozwijane pokazują pliki PractiScore `.pcs`/`.psc`/`.zip` z katalogu roboczego, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`; każda lista ma też opcję **Wybierz inny plik…**. Wybierz trzy pliki, a następnie kliknij **Wczytaj i przejrzyj**. Dwukrotne kliknięcie komórki tabeli pozwala edytować wyświetlane dane dyplomu. Zaznacz wiersz i użyj **Dodaj wiersz dyplomu**, aby utworzyć nowy wiersz. Po wybraniu strzelca seria pozostanie pusta, miejsce będzie ustawione na 1, dane strzelca zostaną uzupełnione, a pola tekstowe i metryki pozostaną puste. Każdy wiersz ma czerwony przycisk **×** z prośbą o potwierdzenie oraz niebieską ikonę zmiany strzelca. Wyszukiwarka strzelców ma formę tabeli z kolumnami: imię, nazwisko, dywizja, kategorie, klasa i wynik. Wpisywanie tekstu filtruje po imieniu, nazwisku, dywizji, kategorii lub klasie. Tabela strzelców ma takie same nagłówki z sortowaniem i filtrowaniem. Kliknij dowolny nagłówek oznaczony ▾, aby posortować lub filtrować kolumnę. Filtr pokazuje listę wartości do zaznaczenia; możesz wybrać kilka naraz i łączyć filtry z różnych kolumn. Kropka przy nagłówku oznacza aktywny filtr. Przycisk **Generuj dyplomy** otwiera wybór ścieżki i formatu DOCX, ODT lub PDF. Przycisk **Generuj dyplomy i otwórz** zapisuje dokument, a następnie otwiera go w domyślnej aplikacji systemu. PDF i konwersja między formatami wymagają LibreOffice.
 
 Dotychczasowy tryb interaktywny terminala uruchomisz poleceniem `practiscore-diplomas -I`. Polecenia `parse` i `render` nadal służą do pracy z wiersza poleceń.
 
@@ -300,7 +300,7 @@ W razie potrzeby użyj `--output-odt` albo `--output-pdf` zamiast `--output-docx
 
 | Problem | Co sprawdzić |
 | --- | --- |
-| Pliku meczu nie ma na liście | Sprawdź, czy jest to eksport `.psc`, albo użyj **Wybierz plik**. |
+| Pliku meczu nie ma na liście | Sprawdź, czy jest to eksport `.pcs`, `.psc` lub `.zip`, albo użyj **Wybierz plik**. |
 | Dywizja lub kategoria nie dostała dyplomu | Sprawdź filtry, `min_competitors` oraz zasady DNF/DQ w konfiguracji. |
 | Zawodnik ma nieoczekiwany status DNF | Sprawdź, czy ma wyniki ze wszystkich torów i czy zaliczył Chrono. |
 | Pole szablonu powoduje błąd | Sprawdź pisownię w tabeli Pól Szablonu. |

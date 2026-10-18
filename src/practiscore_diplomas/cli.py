@@ -22,7 +22,7 @@ _MESSAGES = {
         "description": "Parse PractiScore exports and generate diploma data.",
         "language": "CLI help language (default: system locale)",
         "parse_help": "Create shooter summary and diploma data files.",
-        "parse_input": "PractiScore .psc archive or unpacked export directory",
+        "parse_input": "PractiScore .pcs, .psc, or .zip archive or unpacked export directory",
         "config": "Configuration YAML",
         "summary": "Shooter summary YAML (default: shooters-summary-<match-name>.yaml)",
         "diplomas": "Diploma data YAML (default: diplomas-data-<match-name>.yaml)",
@@ -265,7 +265,7 @@ def _interactive_arguments(language: str) -> list[str]:
     if mode == 1:
         source = _interactive_path(messages["interactive_yaml"], Path("."), ("*.yaml", "*.yml"), messages)
     else:
-        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.psc",), messages)
+        source = _interactive_path(messages["interactive_pcs"], Path("."), ("*.pcs", "*.psc", "*.zip"), messages)
     if mode == 2:
         return ["--language", language, "parse", "-i", str(source), "-c", str(config)]
     template = _interactive_path(messages["interactive_template"], Path("templates"), ("*.docx", "*.odt"), messages)

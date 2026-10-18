@@ -10,11 +10,11 @@ Before starting, prepare these files:
 
 | Item | What it is |
 | --- | --- |
-| PractiScore export | The `.psc` file exported from PractiScore after the match. |
+| PractiScore export | The `.pcs`, `.psc`, or `.zip` archive exported from PractiScore after the match. |
 | Configuration | A YAML file that defines award rules. Ready-to-use examples are in the `configs` folder. |
 | Diploma template | A `.docx` or `.odt` document containing the text placeholders described below. |
 
-Keep the `configs` and `templates` folders next to `practiscore-diplomas.exe`. Put match exports in the working directory; the GUI lists `.pcs`/`.psc` files there, YAML configs in `configs`, and DOCX/ODT templates in `templates`. Each list also offers **Choose another file…**.
+Keep the `configs` and `templates` folders next to `practiscore-diplomas.exe`. Put match exports in the working directory; the GUI lists `.pcs`/`.psc`/`.zip` files there, YAML configs in `configs`, and DOCX/ODT templates in `templates`. Each list also offers **Choose another file…**.
 
 ## Export The Match From PractiScore
 
@@ -259,7 +259,7 @@ Converting between DOCX and ODT also requires LibreOffice. If you use the intera
 
 ## Command-Line Use
 
-Double-clicking `practiscore-diplomas.exe` opens the graphical interface. The dropdowns list PractiScore `.pcs`/`.psc` files from the working directory, YAML configs from `configs`, and DOCX/ODT templates from `templates`; each dropdown also has **Choose another file…**. Choose the three inputs, then select **Load and review**. Double-click any table cell to edit the displayed diploma data. Select a row and use **Add diploma row** to create a new row. Choose a shooter; its series starts blank, its place starts at 1, shooter data is filled in, and text and metric fields start blank. Each row has a red **×** control with a confirmation prompt and a blue switch icon to replace that row’s shooter. The shooter picker is a table with columns for first name, surname, division, categories, class, and score. Typing filters by name, division, category, or class. The shooter table uses the same sortable and filterable headings. Click any table heading (marked with ▾) to sort or filter that column. Filters show selectable values; click multiple values to keep all of them, and combine filters across columns. A filled dot in a heading marks an active filter. Select **Generate diplomas** to choose a DOCX, ODT, or PDF output path, or **Generate diplomas and open** to generate the document and open it in the system default application. PDF and cross-format conversion require LibreOffice.
+Double-clicking `practiscore-diplomas.exe` opens the graphical interface. The dropdowns list PractiScore `.pcs`/`.psc`/`.zip` files from the working directory, YAML configs from `configs`, and DOCX/ODT templates from `templates`; each dropdown also has **Choose another file…**. Choose the three inputs, then select **Load and review**. Double-click any table cell to edit the displayed diploma data. Select a row and use **Add diploma row** to create a new row. Choose a shooter; its series starts blank, its place starts at 1, shooter data is filled in, and text and metric fields start blank. Each row has a red **×** control with a confirmation prompt and a blue switch icon to replace that row’s shooter. The shooter picker is a table with columns for first name, surname, division, categories, class, and score. Typing filters by name, division, category, or class. The shooter table uses the same sortable and filterable headings. Click any table heading (marked with ▾) to sort or filter that column. Filters show selectable values; click multiple values to keep all of them, and combine filters across columns. A filled dot in a heading marks an active filter. Select **Generate diplomas** to choose a DOCX, ODT, or PDF output path, or **Generate diplomas and open** to generate the document and open it in the system default application. PDF and cross-format conversion require LibreOffice.
 
 Start the existing terminal interactive workflow explicitly with `practiscore-diplomas -I`. The `parse` and `render` commands continue to work for command-line use.
 
@@ -300,7 +300,7 @@ Use `--output-odt` or `--output-pdf` instead of `--output-docx` when needed. The
 
 | Problem | What to check |
 | --- | --- |
-| A match file is not listed | Confirm that it is a `.psc` export, or use **Choose file**. |
+| A match file is not listed | Confirm that it is a `.pcs`, `.psc`, or `.zip` export, or use **Choose file**. |
 | No diploma was created for a division or category | Check the configuration's filters, `min_competitors`, and DNF/DQ rules. |
 | A competitor is unexpectedly DNF | Check whether every stage has a score and whether Chrono was passed. |
 | A placeholder causes an error | Check its spelling against the Template Fields table. |

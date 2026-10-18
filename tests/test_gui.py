@@ -76,13 +76,15 @@ def test_shooter_search_matches_division_and_category():
 def test_file_choices_list_matching_files_and_other_option(tmp_path: Path):
     (tmp_path / "match-b.pcs").write_bytes(b"")
     (tmp_path / "match-a.pcs").write_bytes(b"")
+    (tmp_path / "match-c.zip").write_bytes(b"")
     (tmp_path / "notes.txt").write_text("ignore", encoding="utf-8")
 
-    choices = _file_choices(tmp_path, ("*.pcs",), "Choose another file…")
+    choices = _file_choices(tmp_path, ("*.pcs", "*.psc", "*.zip"), "Choose another file…")
 
     assert choices == [
         str((tmp_path / "match-a.pcs").resolve()),
         str((tmp_path / "match-b.pcs").resolve()),
+        str((tmp_path / "match-c.zip").resolve()),
         "Choose another file…",
     ]
 

@@ -33,7 +33,7 @@ uv sync
 
 ## Parse A Match
 
-Point the command at a `.psc` PractiScore ZIP export:
+Point the command at a `.pcs`, `.psc`, or `.zip` PractiScore ZIP export:
 
 ```powershell
 uv run practiscore-diplomas parse -i "match-export.psc" -c "configs\gpa_t1_config.yaml"
