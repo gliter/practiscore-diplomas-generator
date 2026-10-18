@@ -17,7 +17,7 @@ try {
     New-Item -ItemType Directory -Path $releaseRoot -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $repoRoot $OutputRoot) -Force | Out-Null
 
-    uv run pyinstaller --noconfirm --clean --onefile --name practiscore-diplomas --paths src scripts\entrypoint.py
+    uv run pyinstaller --noconfirm --clean --onefile --windowed --name practiscore-diplomas --paths src --add-data "src\practiscore_diplomas\assets;practiscore_diplomas\assets" scripts\entrypoint.py
 
     Copy-Item -LiteralPath (Join-Path $repoRoot "dist\practiscore-diplomas.exe") -Destination $releaseRoot
     Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $releaseRoot
@@ -27,8 +27,8 @@ try {
     Copy-Item -LiteralPath (Join-Path $repoRoot "configs") -Destination $releaseRoot -Recurse
     Get-ChildItem -LiteralPath (Join-Path $releaseRoot "configs") -File -Recurse -Filter "*.bak" |
         Remove-Item -Force
-    if (Test-Path (Join-Path $repoRoot "example-diploma-template.docx")) {
-        Copy-Item -LiteralPath (Join-Path $repoRoot "example-diploma-template.docx") -Destination $releaseRoot
+    if (Test-Path (Join-Path $repoRoot "templates")) {
+        Copy-Item -LiteralPath (Join-Path $repoRoot "templates") -Destination $releaseRoot -Recurse
     }
 
     Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue

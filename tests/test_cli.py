@@ -93,19 +93,28 @@ def test_cli_requires_config(tmp_path: Path, monkeypatch, capsys):
     assert "--config" in capsys.readouterr().err
 
 
-def test_cli_without_arguments_shows_complete_help(monkeypatch, capsys):
-    monkeypatch.setattr(cli.locale, "getlocale", lambda: ("en_US", "UTF-8"))
+def test_cli_without_arguments_opens_gui(monkeypatch):
+    from practiscore_diplomas import gui
+    opened = []
     monkeypatch.setattr(sys, "argv", ["practiscore-diplomas"])
+    monkeypatch.setattr(gui, "launch_gui", lambda language: opened.append(language) or 0)
+    monkeypatch.setattr(cli.locale, "getlocale", lambda: ("en_US", "UTF-8"))
 
     assert main() == 0
-    output = capsys.readouterr().out
-    assert "parse -i PATH" in output
-    assert "--config PATH" in output
-    assert "--template PATH" in output
-    assert "Examples:" in output
-    assert "render -d diplomas-data-MATCH.yaml" in output
-    assert "render -i MATCH.psc -c configs" in output
+    assert opened == ["en"]
 
+
+def test_cli_interactive_flag_runs_terminal_workflow(tmp_path: Path, monkeypatch):
+    input_dir = tmp_path / "match"
+    write_export(input_dir)
+    config = tmp_path / "config.yaml"
+    write_config(config)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "-I"])
+    monkeypatch.setattr(cli, "_interactive_arguments", lambda language: ["parse", "-i", str(input_dir), "-c", str(config)])
+
+    assert main() == 0
+    assert (tmp_path / "diplomas-data-Synthetic-Match.yaml").is_file()
 
 def test_polish_help_contains_diacritics(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["practiscore-diplomas", "--language", "pl", "--help"])
@@ -122,7 +131,8 @@ def test_interactive_arguments_for_rendering_pcs(tmp_path: Path, monkeypatch):
     (tmp_path / "configs").mkdir()
     (tmp_path / "configs" / "gpa.yaml").write_text("series: {}", encoding="utf-8")
     (tmp_path / "match.psc").write_bytes(b"")
-    (tmp_path / "template.odt").write_bytes(b"")
+    (tmp_path / "templates").mkdir()
+    (tmp_path / "templates" / "template.odt").write_bytes(b"")
     monkeypatch.chdir(tmp_path)
     selections = iter([0, 0, 0, 0])
     monkeypatch.setattr(cli, "_select_option", lambda prompt, options: next(selections))
@@ -131,13 +141,14 @@ def test_interactive_arguments_for_rendering_pcs(tmp_path: Path, monkeypatch):
 
     assert cli._interactive_arguments("en") == [
         "--language", "en", "render", "-i", "match.psc", "-c", "configs\\gpa.yaml",
-        "-t", "template.odt", "--output-odt", "diplomas-match.odt",
+        "-t", str(Path("templates") / "template.odt"), "--output-odt", "diplomas-match.odt",
     ]
 
 
 def test_interactive_arguments_for_rendering_yaml_skips_config(tmp_path: Path, monkeypatch):
     (tmp_path / "diplomas-data.yaml").write_text("diplomas: {}", encoding="utf-8")
-    (tmp_path / "template.docx").write_bytes(b"")
+    (tmp_path / "templates").mkdir()
+    (tmp_path / "templates" / "template.docx").write_bytes(b"")
     monkeypatch.chdir(tmp_path)
     selections = iter([1, 0, 0])
     monkeypatch.setattr(cli, "_select_option", lambda prompt, options: next(selections))
@@ -145,7 +156,7 @@ def test_interactive_arguments_for_rendering_yaml_skips_config(tmp_path: Path, m
 
     assert cli._interactive_arguments("en") == [
         "--language", "en", "render", "-d", "diplomas-data.yaml",
-        "-t", "template.docx", "--output-docx", "custom.docx",
+        "-t", str(Path("templates") / "template.docx"), "--output-docx", "custom.docx",
     ]
 
 

@@ -119,7 +119,7 @@ The script uses PyInstaller and creates:
 dist\practiscore-diplomas-generator-0.1.1-windows-x64.zip
 ```
 
-The ZIP contains `practiscore-diplomas.exe`, the example configurations, both user guides, the example DOCX template when present, and the MIT license. Temporary PyInstaller files are placed under `build\` and are ignored by Git. The GitHub Actions release workflow runs the same build automatically after a push to `main`.
+The ZIP contains `practiscore-diplomas.exe`, the example configurations, both user guides, the `templates` folder with example templates, and the MIT license. Temporary PyInstaller files are placed under `build\` and are ignored by Git. The GitHub Actions release workflow runs the same build automatically after a push to `main`.
 
 ## Project Direction
 
@@ -137,6 +137,6 @@ Chronograph stages are detected from `stage_scoretype: Chrono`. By default, a sh
 
 ## Interactive Mode
 
-Run `practiscore-diplomas` without arguments in an interactive terminal to open the workflow menu. Use the up and down arrows and Enter to choose whether to render from a PractiScore export, render from diploma-data YAML, or parse a PractiScore export into YAML files.
+Run `practiscore-diplomas` without arguments to open the graphical interface. Use `practiscore-diplomas -I` to open the terminal interactive workflow, where the up and down arrows and Enter let you choose whether to render from a PractiScore export, render from diploma-data YAML, or parse a PractiScore export into YAML files.
 
-The interactive pickers list configurations from `configs`, match/YAML files from the current directory, and DOCX/ODT templates from the current directory. Each picker has a localized `Choose file` / `Wybierz plik` option that opens the system file dialog. Cancelling that dialog returns to the list. Rendering uses a system save dialog with a suggested output filename and displays a success message after completion.
+The interactive pickers list configurations from `configs`, match/YAML files from the current directory, and DOCX/ODT templates from `templates`. Each picker has a localized `Choose file` / `Wybierz plik` option that opens the system file dialog. Cancelling that dialog returns to the list. Rendering uses a system save dialog with a suggested output filename and displays a success message after completion.

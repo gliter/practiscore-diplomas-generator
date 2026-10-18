@@ -14,7 +14,7 @@ Przed rozpoczęciem przygotuj:
 | Konfigurację | Plik YAML zawierający reguły przyznawania dyplomów. Gotowe przykłady są w folderze `configs`. |
 | Szablon dyplomu | Dokument `.docx` albo `.odt` z polami opisanymi dalej w instrukcji. |
 
-Trzymaj folder `configs` obok `practiscore-diplomas.exe`. Dla wygody plik meczu i szablon możesz umieścić w tym samym folderze.
+Trzymaj foldery `configs` i `templates` obok `practiscore-diplomas.exe`. Pliki meczu umieść w katalogu roboczym. GUI wyświetla z niego pliki `.pcs`/`.psc`, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`. Każda lista zawiera też opcję **Wybierz inny plik…**.
 
 ## Eksport Meczu Z PractiScore
 
@@ -32,22 +32,23 @@ Eksport wykonaj dopiero po zatwierdzeniu wyników i zakończeniu pracy nad mecze
 
 ## Najszybszy Sposób Na Dyplomy
 
-1. Kliknij dwukrotnie `practiscore-diplomas.exe`.
-2. Użyj strzałek góra/dół i klawisza Enter, aby wybrać **Wygenerować dyplomy z pliku PractiScore**.
-3. Wybierz konfigurację nagród, eksport meczu `.psc` oraz szablon dyplomu.
-4. W oknie zapisu zaakceptuj proponowaną nazwę albo wybierz inną.
-5. Po wyświetleniu komunikatu o sukcesie otwórz utworzony dokument i sprawdź kilka pierwszych dyplomów przed drukowaniem.
+Aplikacja zapisuje ustawienia okna, ścieżki ostatnio wybranych plików oraz układ kolumn, sortowanie i filtry w `%APPDATA%\PractiScore Diplomas\settings.json`. Przy wyborze konfiguracji są przyciski **Edytuj**, **Zapisz** i **Zapisz jako**. Edytor otwiera się jako zwykłe, skalowalne i maksymalizowalne okno. Podczas pisania błędy składni YAML jedynie delikatnie podświetlają linię; pełny komunikat walidacji pojawia się dopiero po kliknięciu **Zastosuj**. Podczas generowania dyplomów linia odwołująca się do nieistniejącego pola lub mapy albo do wartości, której mapa nie zawiera, otrzymuje tekst `<błąd: ...>`. Błędny wiersz dyplomu jest podświetlany na czerwono, a generowanie pozostałych dyplomów trwa dalej. Zastosowane zmiany są przechowywane w pamięci i używane przy przeliczaniu lub generowaniu danych dyplomów. Przyciski zapisu są nieaktywne, dopóki konfiguracja nie zostanie zmieniona. Zamknięcie programu z niezapisanymi zmianami wyświetla opcje **Zapisz**, **Zapisz jako**, **Odrzuć zmiany** i **Anuluj**.
 
-Listy pokazują pliki znalezione w bieżącym folderze. Wybierz **Wybierz plik**, aby użyć standardowego okna wyboru pliku systemu Windows. Jeśli zamkniesz je bez wskazania pliku, wrócisz do listy.
+1. Kliknij dwukrotnie `practiscore-diplomas.exe`, aby otworzyć interfejs graficzny.
+2. Wybierz plik PCS. Program od razu sparsuje strzelców i zapisze `shooters-summary-<nazwa-meczu>.yaml`. Jeśli istniejące podsumowanie różni się od świeżego parsowania, wybierz **Dane z .pcs** albo **Dane z podsumowania**; okno pokaże ścieżki i czasy modyfikacji obu plików. Identyczne dane zostaną użyte bez pytania.
+3. Wybierz konfigurację, aby wygenerować dane dyplomów, oraz szablon DOCX lub ODT. Użyj **Edytuj strzelców**, aby zmienić podsumowanie w tabeli z wyszukiwarką i filtrami. Dywizja i klasa mają listy rozwijane, kategorie obsługują wielokrotny wybór, kary otwierają osobne okno z polami dla każdego typu, a DNF/błąd chrono/DQ to checkboxy. Zapis aktualizuje YAML i ponownie generuje dane dyplomów.
+4. Sprawdź wiersze dyplomów i wybierz **Generuj dyplomy…**, aby zapisać dokument, albo **Generuj dyplomy i otwórz**, aby zapisać go i otworzyć w domyślnej aplikacji systemu.
+5. W oknie zapisu zaakceptuj proponowaną nazwę albo wybierz inną.
+6. Otwórz utworzony dokument i sprawdź kilka pierwszych dyplomów przed drukowaniem.
 
-Ten bezpośredni sposób pracy tworzy obok dokumentu także dwa pliki YAML:
+Program tworzy także dwa pliki YAML w bieżącym katalogu roboczym:
 
 ```text
 shooters-summary-<nazwa-meczu>.yaml
 diplomas-data-<nazwa-meczu>.yaml
 ```
 
-Służą one do sprawdzenia, kto otrzymał dyplom i dlaczego. Warto zachować je razem z dokumentacją meczu.
+Służą one do sprawdzenia, kto otrzymał dyplom i dlaczego. Warto zachować je razem z dokumentacją meczu. Podsumowanie strzelców zawiera też sekcję `_match_options` z listami dywizji, kategorii i klas odczytanymi z `match_def.json`; edytor używa tych list w polach wyboru. Edytor kar pokazuje przy każdej karze jej wartość w sekundach za jedno wystąpienie, odczytaną z match_def.json. Sekcja zapisuje też wartości czasowe kar, wartość punktów straconych oraz liczbę punktów straconych za chybienie do poppera z match_def.json. Rekordy strzelców przechowują wyłącznie surowe dane wyniku. Edytor pokazuje wyliczone sekundy kar i czas łączny jako pola tylko do odczytu, przeliczane po zmianie danych surowych.
 
 ## Którą Opcję Menu Wybrać
 
@@ -188,7 +189,7 @@ Użyj `{{ pole }}`, aby wstawić wartość, oraz `{{ nazwa_mapy(pole) }}`, aby z
 | `shooter.first_name`, `shooter.last_name` | Imię i nazwisko zawodnika. |
 | `shooter.division`, `shooter.categories`, `shooter.class` | Dane zawodnika zapisane w PractiScore. |
 | `shooter.raw_time`, `shooter.points_down`, `shooter.steel_misses`, `shooter.penalty_seconds`, `shooter.total_time` | Wartości wyniku. |
-| `shooter.dnf`, `shooter.dq`, `shooter.shooter_uid` | Status zawodnika i wewnętrzny identyfikator. |
+| `shooter.dnf`, `shooter.chrono_failure`, `shooter.dq`, `shooter.shooter_uid` | Status zawodnika, osobny wynik kontroli chrono i wewnętrzny identyfikator. |
 
 Te linie YAML przekazują do szablonu dokumentu wartości `first_line` do `fourth_line`. Pola w pliku DOCX lub ODT opisuje następna sekcja. Wywołania map stosuje się w konfiguracji, a nie bezpośrednio w szablonie dokumentu.
 
@@ -202,7 +203,7 @@ exclude_shooters:
   ids: []
 ```
 
-`mark_chrono_failure_as_dnf: true` jest ustawieniem domyślnym. Gdy mecz zawiera tor Chrono, zawodnik, którego kontrola wyposażenia nie ma statusu Pass, jest traktowany jako DNF. Zmień wartość na `false` tylko wtedy, gdy regulamin zawodów wymaga innego rozstrzygnięcia.
+`chrono_failure` w podsumowaniu zapisuje, czy kontrola wyposażenia na torze Chrono nie miała statusu Pass. To pole jest niezależne od `dnf`. Podczas generowania danych dyplomów `mark_chrono_failure_as_dnf: true` (domyślnie) traktuje taki błąd jak DNF; `false` pozwala uwzględnić strzelca. Parsowanie PCS nie wymaga konfiguracji.
 
 ## Przygotowanie Szablonu Dyplomu
 
@@ -214,7 +215,7 @@ Użyj pliku DOCX albo ODT jako szablonu. Wstaw pola w miejscach, w których teks
 {{ shooter.first_name }} {{ shooter.last_name }}
 ```
 
-Program tworzy kopię szablonu dla każdego dyplomu. Zachowuje formatowanie dokumentu, w tym czcionki, rozmiary, wyrównanie i tabele. W pakiecie znajduje się `example-diploma-template.docx`, czyli niewielki działający przykład.
+Program tworzy kopię szablonu dla każdego dyplomu. Zachowuje formatowanie dokumentu, w tym czcionki, rozmiary, wyrównanie i tabele. W pakiecie znajduje się `templates/example-diploma-template.docx`, czyli niewielki działający przykład.
 
 ### Pola Szablonu
 
@@ -258,7 +259,13 @@ Konwersja między DOCX i ODT również wymaga LibreOffice. W trybie interaktywny
 
 ## Użycie Z Wiersza Poleceń
 
-Tryb interaktywny jest zalecany. Poniższe polecenia przydają się, gdy chcesz powtarzać ten sam proces lub automatyzować znany przebieg pracy.
+Dwukrotne kliknięcie `practiscore-diplomas.exe` otwiera interfejs graficzny. Listy rozwijane pokazują pliki PractiScore `.pcs`/`.psc` z katalogu roboczego, konfiguracje YAML z `configs` oraz szablony DOCX/ODT z `templates`; każda lista ma też opcję **Wybierz inny plik…**. Wybierz trzy pliki, a następnie kliknij **Wczytaj i przejrzyj**. Dwukrotne kliknięcie komórki tabeli pozwala edytować wyświetlane dane dyplomu. Zaznacz wiersz i użyj **Dodaj wiersz dyplomu**, aby utworzyć nowy wiersz. Po wybraniu strzelca seria pozostanie pusta, miejsce będzie ustawione na 1, dane strzelca zostaną uzupełnione, a pola tekstowe i metryki pozostaną puste. Każdy wiersz ma czerwony przycisk **×** z prośbą o potwierdzenie oraz niebieską ikonę zmiany strzelca. Wyszukiwarka strzelców ma formę tabeli z kolumnami: imię, nazwisko, dywizja, kategorie, klasa i wynik. Wpisywanie tekstu filtruje po imieniu, nazwisku, dywizji, kategorii lub klasie. Tabela strzelców ma takie same nagłówki z sortowaniem i filtrowaniem. Kliknij dowolny nagłówek oznaczony ▾, aby posortować lub filtrować kolumnę. Filtr pokazuje listę wartości do zaznaczenia; możesz wybrać kilka naraz i łączyć filtry z różnych kolumn. Kropka przy nagłówku oznacza aktywny filtr. Przycisk **Generuj dyplomy** otwiera wybór ścieżki i formatu DOCX, ODT lub PDF. Przycisk **Generuj dyplomy i otwórz** zapisuje dokument, a następnie otwiera go w domyślnej aplikacji systemu. PDF i konwersja między formatami wymagają LibreOffice.
+
+Dotychczasowy tryb interaktywny terminala uruchomisz poleceniem `practiscore-diplomas -I`. Polecenia `parse` i `render` nadal służą do pracy z wiersza poleceń.
+
+W ramach serii grupy są sortowane według liczby uprawnionych strzelców, od największej do najmniejszej. Dyplomy w każdej grupie są wyświetlane od ostatniego miejsca do pierwszego.
+
+Interfejs graficzny jest zalecany do przeglądania i generowania dyplomów. Opcja `-I` uruchamia interaktywny tryb terminala. Poniższe polecenia przydają się przy powtarzaniu procesu lub automatyzacji.
 
 Bezpośrednie generowanie z meczu:
 
