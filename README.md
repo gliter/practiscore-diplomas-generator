@@ -17,6 +17,8 @@ This link always downloads the package from the latest published release.
 3. Double-click the executable. Choose a PractiScore `.pcs`, `.psc`, or `.zip` match archive, an award configuration, and a DOCX/ODT template.
 4. Review the diploma rows, then choose **Generate diplomas…** or **Generate diplomas and open**.
 
+Click **Help (F1)** or press **F1** in the main window for the bundled offline guide.
+
 The application also accepts an unpacked PractiScore export directory from the command line. The GUI lists match files in its working directory and includes a file browser option for each input.
 
 ### Command line and interactive mode

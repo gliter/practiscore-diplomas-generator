@@ -17,7 +17,7 @@ try {
     New-Item -ItemType Directory -Path $releaseRoot -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $repoRoot $OutputRoot) -Force | Out-Null
 
-    uv run pyinstaller --noconfirm --clean --onefile --windowed --name practiscore-diplomas --paths src --add-data "src\practiscore_diplomas\assets;practiscore_diplomas\assets" scripts\entrypoint.py
+    uv run pyinstaller --noconfirm --clean --onefile --windowed --name practiscore-diplomas --paths src --add-data "src\practiscore_diplomas\assets;practiscore_diplomas\assets" --add-data "docs\README.pl.md;practiscore_diplomas\docs" --add-data "docs\README.en.md;practiscore_diplomas\docs" --add-data "docs\psc-1.png;practiscore_diplomas\docs" --add-data "docs\psc-2.png;practiscore_diplomas\docs" scripts\entrypoint.py
 
     Copy-Item -LiteralPath (Join-Path $repoRoot "dist\practiscore-diplomas.exe") -Destination $releaseRoot
     Copy-Item -LiteralPath (Join-Path $repoRoot "LICENSE") -Destination $releaseRoot

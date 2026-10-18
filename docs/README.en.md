@@ -10,6 +10,8 @@ Start with the graphical workflow below, or go directly to [terminal use](#use-t
 
 You need three inputs: a final PractiScore export, a YAML award configuration from `configs` (or your own copy), and a DOCX/ODT template from `templates` (or your own design). [Download the latest Windows package](https://github.com/gliter/practiscore-diplomas-generator/releases/latest/download/practiscore-diplomas-generator-windows-x64.zip) and extract it before starting; Python and `uv` are not required.
 
+Click **Help (F1)** at the bottom right or press **F1** in the main window to open the offline guide. It displays this guide: docs/README.en.md in English or docs/README.pl.md in Polish, depending on the application language. The window can be resized and maximized. Both guides and their screenshots are bundled with the EXE and Python package; the help window displays images offline.
+
 ### 1. Export the match
 
 In PractiScore, finish and verify the match, then choose **Import / Export** → **Export Match**. Save the exported archive. The app accepts `.pcs`, `.psc`, and `.zip` files; all three are ZIP archives. An unpacked export directory is also supported when using the command line.

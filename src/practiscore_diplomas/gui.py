@@ -20,6 +20,7 @@ from .cli import _match_document_path, _match_output_path, _system_language, _wr
 from .diplomas import _render_template_or_error, generate_diplomas, load_config, load_config_text
 from .parser import SUMMARY_OPTIONS_KEY, derive_score_fields, load_match_data, parse_match_data
 from .render import render_diploma_data
+from .help_viewer import show_help
 
 LABELS = {
     "en": ["PractiScore Diplomas", "PractiScore file (.pcs, .psc, or .zip)", "Configuration (.yaml)", "Template (.docx or .odt)", "Browse…", "Regenerate diploma data", "Generate diplomas…", "Series", "Place", "Division", "Category", "Class", "Shooter ID", "First name", "Last name", "First line", "Second line", "Third line", "Fourth line", "Choose a PCS file to create or load shooter data; select configuration to generate diploma data.", "Diplomas loaded: {}. Double-click a cell to edit it.", "Diplomas generated: {}", "Could not complete the operation", "Save generated diplomas", "No diploma records were produced by this configuration.", "Choose another file…", "Add diploma row", "Remove selected row", "Change shooter", "Select shooter", "Use shooter", "Cancel", "Select a diploma row to copy before adding one.", "Select one or more diploma rows to remove.", "Select a diploma row first."],
@@ -1056,7 +1057,27 @@ def launch_gui(language: str | None = None) -> int:
         sync_action_trees,
     )
     table_controllers["diplomas"] = table
-    ttk.Label(root, textvariable=status, anchor="w").grid(row=5, column=0, columnspan=4, padx=9, pady=7, sticky="ew")
+    help_window: tk.Toplevel | None = None
+
+    def open_help(_event=None):
+        nonlocal help_window
+        if help_window is not None and help_window.winfo_exists():
+            help_window.deiconify()
+            help_window.lift()
+            help_window.focus_set()
+        else:
+            try:
+                help_window = show_help(root, language or _system_language())
+            except (OSError, UnicodeError) as exc:
+                messagebox.showerror(error, str(exc), parent=root)
+        return "break"
+
+    footer = ttk.Frame(root)
+    footer.grid(row=5, column=0, columnspan=4, padx=9, pady=7, sticky="ew")
+    help_label = "Pomoc (F1)" if (language or _system_language()) == "pl" else "Help (F1)"
+    ttk.Button(footer, text=help_label, command=open_help).pack(side="right", padx=(12, 0))
+    ttk.Label(footer, textvariable=status, anchor="w").pack(side="left", fill="x", expand=True)
+    root.bind("<F1>", open_help)
     root.columnconfigure(1, weight=1)
     root.rowconfigure(4, weight=1)
 

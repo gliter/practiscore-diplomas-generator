@@ -10,6 +10,8 @@ Zacznij od opisu pracy w GUI poniżej albo przejdź do [terminala](#użycie-w-te
 
 Przygotuj trzy pliki: końcowy eksport z PractiScore, konfigurację nagród YAML z `configs` (lub własną kopię) i szablon DOCX/ODT z `templates` (lub własny projekt). Przed rozpoczęciem [pobierz najnowszy pakiet Windows](https://github.com/gliter/practiscore-diplomas-generator/releases/latest/download/practiscore-diplomas-generator-windows-x64.zip) i rozpakuj go; Python ani `uv` nie są wymagane.
 
+Kliknij **Pomoc (F1)** w prawym dolnym rogu albo naciśnij **F1** w głównym oknie, aby otworzyć instrukcję offline. Wyświetla ona tę instrukcję: docs/README.pl.md po polsku albo docs/README.en.md po angielsku, zależnie od języka aplikacji. Okno można skalować i maksymalizować. Obie instrukcje i ich zrzuty ekranu są dołączone do EXE i pakietu Pythona; okno pomocy wyświetla obrazki offline.
+
 ### 1. Wyeksportuj mecz
 
 W PractiScore zakończ i sprawdź wyniki, a następnie wybierz **Import / Export** → **Export Match**. Zapisz wyeksportowane archiwum. Program obsługuje pliki `.pcs`, `.psc` i `.zip` — wszystkie są archiwami ZIP. W wierszu poleceń można też wskazać rozpakowany katalog eksportu.
